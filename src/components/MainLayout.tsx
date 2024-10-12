@@ -1,7 +1,9 @@
 import React from "react";
 
-const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <div className="dark h-screen w-full bg-black">{children}</div>;
-};
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
 
-export default MainLayout;
+export default function MainLayout({ children }: MainLayoutProps) {
+  return <div className="dark h-screen w-full bg-black">{children}</div>;
+}
