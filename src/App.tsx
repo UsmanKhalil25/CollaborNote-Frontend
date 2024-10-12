@@ -1,18 +1,8 @@
-import { Button } from "./components/ui/button";
+import React from "react";
+import Router from "@/router";
 
-function App() {
-  const handleClick = () => {
-    console.log("Button clicked");
-  };
-  return (
-    <>
-      <div className="w-full h-screen flex justify-center items-center">
-        <Button variant={"default"} onClick={handleClick}>
-          Click me
-        </Button>
-      </div>
-    </>
-  );
-}
+const App: React.FC = () => {
+  return <Router />;
+};
 
 export default App;
