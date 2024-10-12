@@ -1,11 +1,7 @@
 import React from "react";
-
+import Dashboard from "@/components/Dashboard";
 const Home: React.FC = () => {
-  return (
-    <div>
-      <h1>Welcome to Collabornote</h1>
-    </div>
-  );
+  return <Dashboard />;
 };
 
 export default Home;
