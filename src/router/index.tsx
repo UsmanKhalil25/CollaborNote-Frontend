@@ -4,6 +4,7 @@ import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import Register from "@/pages/Register";
+import Settings from "@/pages/Settings";
 
 const Router: React.FC = () => {
   return (
@@ -11,7 +12,9 @@ const Router: React.FC = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/settings" element={<Settings />} />
       <Route path="*" element={<NotFound />} />
+
     </Routes>
   );
 };
