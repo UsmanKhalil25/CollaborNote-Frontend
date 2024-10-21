@@ -4,7 +4,7 @@ import InputForm from "@/components/ProfileSettings";
 import AccountForm from "@/components/AccountSettings";
 import GPTForm from "@/components/ChatGPTSettings";
 
-const Settings:React.FC = () => {
+const SettingsPage:React.FC = () => {
 
   return (
     <div className="grid min-h-screen w-full grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -16,4 +16,4 @@ const Settings:React.FC = () => {
   )
 };
 
-export default Settings;
+export default SettingsPage;

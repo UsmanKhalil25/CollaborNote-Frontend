@@ -1,13 +1,9 @@
 import React from "react";
 import Router from "@/router";
-import MainLayout from "@/components/MainLayout";
+import MainLayout from "@/components/layouts/MainLayout";
 
 const App: React.FC = () => {
-  return (
-    <MainLayout>
-      <Router />
-    </MainLayout>
-  );
+  return <Router />;
 };
 
 export default App;
