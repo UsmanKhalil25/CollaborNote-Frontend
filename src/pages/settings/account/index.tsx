@@ -1,11 +1,18 @@
-import React from "react";
+import { Separator } from "@/components/ui/separator";
+import AccountSettingsForm from "@/components/forms/AccountSettingsForm";
 
-const SettingsAccount: React.FC = () => {
+export default function SettingsAccountPage() {
   return (
-    <div className="flex justify-center items-center h-full text-white">
-      This is setting account page
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Account</h3>
+        <p className="text-sm text-muted-foreground">
+          Update your account settings. Set your preferred language and
+          timezone.
+        </p>
+      </div>
+      <Separator />
+      <AccountSettingsForm />
     </div>
   );
-};
-
-export default SettingsAccount;
+}

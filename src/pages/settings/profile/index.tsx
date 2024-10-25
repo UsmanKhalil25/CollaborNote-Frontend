@@ -1,11 +1,17 @@
-import React from "react";
+import { Separator } from "@/components/ui/separator";
+import ProfileSettingsForm from "@/components/forms/ProfileSettingsForm";
 
-const SettingsProfile: React.FC = () => {
+export default function SettingsProfilePage() {
   return (
-    <div className="flex justify-center items-center h-full">
-        This is setting account page
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Profile</h3>
+        <p className="text-sm text-muted-foreground">
+          This is how others will see you on the site.
+        </p>
+      </div>
+      <Separator />
+      <ProfileSettingsForm />
     </div>
   );
-};
-
-export default SettingsProfile;
+}

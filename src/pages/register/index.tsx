@@ -1,12 +1,9 @@
-import React from "react";
 import RegisterForm from "@/components/RegisterForm";
 
-const Register: React.FC = () => {
+export default function RegisterPage() {
   return (
-    <div className="flex justify-center items-center h-full">
+    <div className="flex justify-center items-center min-h-screen">
       <RegisterForm />
     </div>
   );
-};
-
-export default Register;
+}

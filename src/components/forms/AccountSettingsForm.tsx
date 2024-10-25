@@ -1,12 +1,21 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon, CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Form,
   FormControl,
@@ -15,83 +24,89 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-  } from "@/components/ui/popover"
-  const languages = [
-    { label: "English", value: "en" },
-    { label: "French", value: "fr" },
-    { label: "German", value: "de" },
-    { label: "Spanish", value: "es" },
-    { label: "Portuguese", value: "pt" },
-    { label: "Russian", value: "ru" },
-    { label: "Japanese", value: "ja" },
-    { label: "Korean", value: "ko" },
-    { label: "Chinese", value: "zh" },
-  ] as const
-  import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-  } from "@/components/ui/command"
-import { Input } from "@/components/ui/input"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-const FormSchema = z.object({
-  name: z.string().min(3, {
-    message: "Name must be at least 3 characters.",
+const languages = [
+  { label: "English", value: "en" },
+  { label: "French", value: "fr" },
+  { label: "German", value: "de" },
+  { label: "Spanish", value: "es" },
+  { label: "Portuguese", value: "pt" },
+  { label: "Russian", value: "ru" },
+  { label: "Japanese", value: "ja" },
+  { label: "Korean", value: "ko" },
+  { label: "Chinese", value: "zh" },
+] as const;
+
+const accountFormSchema = z.object({
+  name: z
+    .string()
+    .min(2, {
+      message: "Name must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "Name must not be longer than 30 characters.",
+    }),
+  dob: z.date({
+    required_error: "A date of birth is required.",
   }),
   language: z.string({
     required_error: "Please select a language.",
   }),
-  dob: z.date({
-    required_error: "A date of birth is required.",
-  })
+});
 
-})
+type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-const AccountForm = () => {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      name: "",
+// This can come from your database or API.
+const defaultValues: Partial<AccountFormValues> = {
+  // name: "Your name",
+  // dob: new Date("2023-01-23"),
+};
 
-    },
-  })
+export default function AccountSettingsForm() {
+  const form = useForm<AccountFormValues>({
+    resolver: zodResolver(accountFormSchema),
+    defaultValues,
+  });
 
-  function onSubmit() {
-    alert("Success: " );
+  function onSubmit(data: AccountFormValues) {
+    toast({
+      title: "You submitted the following values:",
+      description: (
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+    });
   }
 
   return (
-    <div className="w-90 p-6 rounded-lg shadow-md  text-white">
-      <Form {...form}>
-        <div className="mb-4 ">
-          <h3 className="text-lg font-medium">Account</h3>
-          <p className="text-sm ">Update your account settings. Set your preferred language and timezone.</p>
-        </div>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-white">Name</FormLabel>
-                <FormControl>
-                  <Input className=" text-white " placeholder="Your Name" {...field} />
-                </FormControl>
-                <FormDescription >This is the name that will be displayed on your profile and in emails.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-         
-         <FormField
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Your name" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is the name that will be displayed on your profile and in
+                emails.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
           control={form.control}
           name="dob"
           render={({ field }) => (
@@ -116,7 +131,7 @@ const AccountForm = () => {
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-black text-white" align="start">
+                <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={field.value}
@@ -135,14 +150,13 @@ const AccountForm = () => {
             </FormItem>
           )}
         />
-          
         <FormField
           control={form.control}
           name="language"
           render={({ field }) => (
-            <FormItem className="  text-white flex flex-col">
+            <FormItem className="flex flex-col">
               <FormLabel>Language</FormLabel>
-              <Popover >
+              <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
@@ -150,7 +164,7 @@ const AccountForm = () => {
                       role="combobox"
                       className={cn(
                         "w-[200px] justify-between",
-                        !field.value 
+                        !field.value && "text-muted-foreground"
                       )}
                     >
                       {field.value
@@ -158,12 +172,12 @@ const AccountForm = () => {
                             (language) => language.value === field.value
                           )?.label
                         : "Select language"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="  text-white w-[200px] p-0">
-                  <Command >
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
                     <CommandInput placeholder="Search language..." />
                     <CommandList>
                       <CommandEmpty>No language found.</CommandEmpty>
@@ -173,10 +187,10 @@ const AccountForm = () => {
                             value={language.label}
                             key={language.value}
                             onSelect={() => {
-                              form.setValue("language", language.value)
+                              form.setValue("language", language.value);
                             }}
                           >
-                            <Check
+                            <CheckIcon
                               className={cn(
                                 "mr-2 h-4 w-4",
                                 language.value === field.value
@@ -199,12 +213,8 @@ const AccountForm = () => {
             </FormItem>
           )}
         />
-          
-          <Button type="submit" className="mt-4">Submit</Button>
-        </form>
-      </Form>
-    </div>
-  )
+        <Button type="submit">Update account</Button>
+      </form>
+    </Form>
+  );
 }
-
-export default AccountForm;
