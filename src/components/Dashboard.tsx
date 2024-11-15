@@ -1,5 +1,8 @@
+import {TypographyH1} from "@/components/ui/typography-h1.tsx";
 export default function Dashboard() {
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]"></div>
+    <div className="flex justify-between items-center">
+      <TypographyH1 text={"Welcome back, Usman"}/>
+    </div>
   );
 }
