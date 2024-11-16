@@ -11,17 +11,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form.tsx";
 
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
 
-import AuthCard from "@/components/AuthCard";
+import AuthCard from "@/components/AuthCard.tsx";
 
-import { apiRequest } from "@/utils/api";
+import { apiRequest } from "@/utils/api.ts";
 import { HTTP_METHODS } from "@/constants";
-import { camelToSnakeCase } from "@/utils/string";
+import { camelToSnakeCase } from "@/lib/utils.ts";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -55,7 +55,7 @@ export default function RegisterForm() {
       return apiRequest<Response>(
         `${import.meta.env.VITE_API_URL}/users/register`,
         HTTP_METHODS.POST,
-        transformedData
+        transformedData,
       );
     },
     onSuccess: (res: Response) => {

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Pen, Users, Notebook } from "lucide-react";
+import { Home, Pen, Users, Notebook } from "lucide-react";
 
 export default function MainSidebar() {
   const location = useLocation();
@@ -7,7 +7,6 @@ export default function MainSidebar() {
   const ROUTES = [
     { label: "Dashboard", path: "/", icon: Home },
     { label: "Notes", path: "/notes", icon: Pen },
-    { label: "Explore", path: "/explore", icon: Search },
     { label: "Friends", path: "/friends", icon: Users },
   ];
 

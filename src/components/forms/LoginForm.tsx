@@ -11,15 +11,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form.tsx";
 
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
 
-import AuthCard from "@/components/AuthCard";
+import AuthCard from "@/components/AuthCard.tsx";
 
-import { apiRequest } from "@/utils/api";
+import { apiRequest } from "@/utils/api.ts";
 import { HTTP_METHODS } from "@/constants";
 
 const loginSchema = z.object({
@@ -47,7 +47,7 @@ export default function LoginForm() {
       apiRequest<Response>(
         `${import.meta.env.VITE_API_URL}/users/login`,
         HTTP_METHODS.POST,
-        data
+        data,
       ),
     onSuccess: (res: Response) => {
       toast({

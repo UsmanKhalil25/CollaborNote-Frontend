@@ -6,7 +6,6 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import SettingsLayout from "@/components/layouts/SettingsLayout";
 
 import Home from "@/app/home";
-import Explore from "@/app/explore";
 import Friends from "@/app/friends";
 import Login from "@/app/login";
 import NotFound from "@/app/not-found";
@@ -25,7 +24,6 @@ export default function Router() {
           <Route path="register" element={<Register />} />
           <Route element={<DashboardLayout />}>
             <Route index element={<Home />} />
-            <Route path="explore" element={<Explore />} />
             <Route path="friends" element={<Friends />} />
           </Route>
           <Route path="settings" element={<SettingsLayout />}>
