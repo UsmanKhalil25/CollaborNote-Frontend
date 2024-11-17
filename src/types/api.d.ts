@@ -1,5 +1,7 @@
-interface Response {
+interface Response<T> {
+  data: T;
   message: string;
+  status: string;
 }
 
 interface Error {

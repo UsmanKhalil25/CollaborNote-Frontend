@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { useContext } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 
@@ -19,8 +20,17 @@ import { Input } from "@/components/ui/input.tsx";
 
 import AuthCard from "@/components/AuthCard.tsx";
 
-import { apiRequest } from "@/utils/api.ts";
+import { AuthContext } from "@/auth/auth-context.ts";
+import { apiRequest } from "@/api/api-config.ts";
 import { HTTP_METHODS } from "@/constants";
+import { ENDPOINTS } from "@/config/api-config.ts";
+
+interface LoginResponse {
+  data: {
+    access_token: string;
+  };
+  message: string;
+}
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -36,23 +46,28 @@ const defaultValues: Partial<LoginFormValues> = {
 
 export default function LoginForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const auth = useContext(AuthContext);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues,
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending } = useMutation<
+    LoginResponse,
+    Error,
+    LoginFormValues
+  >({
     mutationFn: (data: LoginFormValues) =>
-      apiRequest<Response>(
-        `${import.meta.env.VITE_API_URL}/users/login`,
-        HTTP_METHODS.POST,
-        data,
-      ),
-    onSuccess: (res: Response) => {
+      apiRequest<LoginResponse>(ENDPOINTS.auth.login, HTTP_METHODS.POST, data),
+    onSuccess: (res: LoginResponse) => {
+      auth?.setToken(res.data.access_token);
+
       toast({
         description: res.message,
       });
+      navigate("/");
     },
     onError: (error: Error) => {
       toast({
@@ -100,15 +115,7 @@ export default function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center">
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <Link
-                    to="#"
-                    className="ml-auto inline-block text-sm underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
+                <FormLabel htmlFor="password">Password</FormLabel>
                 <FormControl>
                   <Input id="password" type="password" required {...field} />
                 </FormControl>

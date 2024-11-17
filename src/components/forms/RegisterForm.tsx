@@ -19,9 +19,10 @@ import { Input } from "@/components/ui/input.tsx";
 
 import AuthCard from "@/components/AuthCard.tsx";
 
-import { apiRequest } from "@/utils/api.ts";
+import { apiRequest } from "@/api/api-config.ts";
 import { HTTP_METHODS } from "@/constants";
 import { camelToSnakeCase } from "@/lib/utils.ts";
+import { ENDPOINTS } from "@/config/api-config.ts";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -53,7 +54,7 @@ export default function RegisterForm() {
       const transformedData = camelToSnakeCase(data);
 
       return apiRequest<Response>(
-        `${import.meta.env.VITE_API_URL}/users/register`,
+        ENDPOINTS.auth.register,
         HTTP_METHODS.POST,
         transformedData,
       );

@@ -1,8 +1,10 @@
+import { HTTP_METHODS } from "@/constants";
+
 export async function apiRequest<T>(
   route: string,
-  method: string = "GET",
+  method: string = HTTP_METHODS.GET,
   body: object | null = null,
-  headers: HeadersInit = { "Content-Type": "application/json" }
+  headers: HeadersInit = { "Content-Type": "application/json" },
 ): Promise<T> {
   const response = await fetch(route, {
     method,
