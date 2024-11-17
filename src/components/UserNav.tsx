@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AuthContext } from "@/auth/auth-context.ts";
 
 const NAV_ITEMS = [
   { label: "Profile", path: "/profile" },
@@ -18,6 +21,7 @@ const NAV_ITEMS = [
 
 export default function UserNav() {
   const navigate = useNavigate();
+  const auth = useContext(AuthContext);
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -25,7 +29,8 @@ export default function UserNav() {
 
   const handleLogout = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    console.log("logout click");
+    auth?.setUser(null);
+    auth?.setToken(null);
   };
 
   return (
@@ -38,16 +43,14 @@ export default function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56 dark font-geist"
-        align="end"
-        forceMount
-      >
+      <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">shadcn</p>
+            <p className="text-sm font-medium leading-none">
+              {auth?.user?.first_name}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-              m@example.com
+              {auth?.user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
