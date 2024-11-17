@@ -18,3 +18,12 @@ export const camelToSnakeCase = (obj: Record<string, any>) => {
   }
   return newObj;
 };
+
+export const getUserInitials = (
+  firstName?: string,
+  lastName?: string,
+): string => {
+  const firstInitial = firstName?.[0]?.toUpperCase() || "";
+  const lastInitial = lastName?.[0]?.toUpperCase() || "";
+  return `${firstInitial}${lastInitial}`;
+};
