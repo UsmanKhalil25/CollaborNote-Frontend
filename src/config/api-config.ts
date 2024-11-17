@@ -8,9 +8,9 @@ export const ENDPOINTS = {
   },
   users: {
     current: `${API_BASE_URL}/users/current`,
+    friends: `${API_BASE_URL}/users/friends`,
   },
-  posts: {
-    getAll: `${API_BASE_URL}/posts`,
-    create: `${API_BASE_URL}/posts/create`,
+  friendRequests: {
+    index: `${API_BASE_URL}/friend-requests`,
   },
 };

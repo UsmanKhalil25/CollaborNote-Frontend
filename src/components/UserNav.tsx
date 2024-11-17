@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthContext } from "@/auth/auth-context.ts";
+import { getUserInitials } from "@/lib/utils.ts";
 
 const NAV_ITEMS = [
   { label: "Profile", path: "/profile" },
@@ -39,7 +40,9 @@ export default function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar>
             <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarFallback>
+              {getUserInitials(auth?.user?.first_name, auth?.user?.last_name)}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
