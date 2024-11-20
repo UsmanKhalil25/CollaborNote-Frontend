@@ -4,17 +4,18 @@ import { User } from "@/types/user";
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { useQuery } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-interface TokenResponse {
+interface TokenData {
   access_token: string;
 }
 
-type UsersResponse = AxiosResponse<Response<{ user: User }>>;
+interface UserData {
+  user: User;
+}
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const storedToken = sessionStorage.getItem("auth_token");
@@ -23,10 +24,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const { data, refetch } = useQuery<User | null>({
     queryKey: ["user", token],
-    queryFn: async () => {
+    queryFn: async (): Promise<User | null> => {
       if (!token) return null;
 
-      const response: UsersResponse = await api.get(ENDPOINTS.users.current);
+      const response = await api.get<Response<UserData>>(
+        ENDPOINTS.users.current
+      );
 
       return response.data.data.user;
     },
@@ -57,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       },
       (error) => {
         return Promise.reject(error);
-      },
+      }
     );
     return () => {
       api.interceptors.request.eject(requestInterceptor);
@@ -73,8 +76,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           originalRequest._retry = true;
 
           try {
-            const res = await api.post<TokenResponse>(ENDPOINTS.auth.refresh);
-            const newToken = res.data.access_token;
+            const res = await api.post<Response<TokenData>>(
+              ENDPOINTS.auth.refresh
+            );
+            const newToken = res.data.data.access_token;
+
             setToken(newToken);
 
             originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
@@ -90,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         }
         return Promise.reject(error);
-      },
+      }
     );
 
     return () => {

@@ -1,18 +1,45 @@
+import { useState } from "react";
 import { UserPlus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import UserList from "@/components/UserList";
+
+import useDebounce from "@/hooks/use-debounce";
+import { QUERY } from "@/constants";
+import { ENDPOINTS } from "@/config/api-config";
+import { api } from "@/api";
+import { SearchUser } from "@/types/search-user";
+
+interface SearchUserData {
+  users: SearchUser[];
+}
 
 export default function AddFriendDialogue() {
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const debouncedQuery = useDebounce(searchQuery, 500);
+
+  const { data: fetchedUsers, isLoading } = useQuery<SearchUser[]>({
+    queryKey: [QUERY.USERS, debouncedQuery],
+    queryFn: async (): Promise<SearchUser[]> => {
+      const response = await api.get<Response<SearchUserData>>(
+        ENDPOINTS.users.search(debouncedQuery)
+      );
+      return response.data.data.users;
+    },
+    enabled: !!debouncedQuery,
+  });
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -24,33 +51,25 @@ export default function AddFriendDialogue() {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add Friends</DialogTitle>
-          <DialogDescription>Lets make some new connections</DialogDescription>
+          <DialogDescription>Let's make some new connections</DialogDescription>
         </DialogHeader>
+
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              defaultValue="Pedro Duarte"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Username
-            </Label>
-            <Input
-              id="username"
-              defaultValue="@peduarte"
-              className="col-span-3"
-            />
-          </div>
+          <Input
+            id="search"
+            placeholder="Enter email"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="col-span-3"
+          />
         </div>
-        <DialogFooter>
-          <Button type="submit">Save changes</Button>
-        </DialogFooter>
+        <div className="h-72 flex justify-center items-start">
+          <UserList
+            users={fetchedUsers}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

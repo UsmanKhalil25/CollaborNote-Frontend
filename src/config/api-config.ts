@@ -9,8 +9,14 @@ export const ENDPOINTS = {
   users: {
     current: `${API_BASE_URL}/users/current`,
     friends: `${API_BASE_URL}/users/friends`,
+    search: (searchQuery: string) =>
+      `${API_BASE_URL}/users/search?query=${searchQuery}`,
   },
   friendRequests: {
-    index: `${API_BASE_URL}/friend-requests`,
+    index: (status: string) =>
+      `${API_BASE_URL}/friend-requests?status=${status}`,
+    send: (userId: string) => `${API_BASE_URL}/friend-requests/send/${userId}`,
+    updateStatus: (requestId: string, newStatus: string) =>
+      `${API_BASE_URL}/friend-requests/${requestId}/status?new_status=${newStatus}`,
   },
 };

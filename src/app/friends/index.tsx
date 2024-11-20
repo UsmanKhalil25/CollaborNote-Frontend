@@ -5,7 +5,7 @@ import AddFriendDialogue from "@/components/AddFriendDialogue.tsx";
 
 export default function FriendsPage() {
   return (
-    <div className="h-full space-y-2">
+    <div className="h-full space-y-4">
       <div className="flex justify-between items-center">
         <TypographyH2 text={"Manage your Friends"} />
         <AddFriendDialogue />
