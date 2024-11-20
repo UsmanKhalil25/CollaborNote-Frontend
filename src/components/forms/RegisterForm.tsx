@@ -19,10 +19,11 @@ import { Input } from "@/components/ui/input.tsx";
 
 import AuthCard from "@/components/AuthCard.tsx";
 
-import { apiRequest } from "@/api/api-config.ts";
-import { HTTP_METHODS } from "@/constants";
 import { camelToSnakeCase } from "@/lib/utils.ts";
 import { ENDPOINTS } from "@/config/api-config.ts";
+import { Loader2 } from "lucide-react";
+import { api } from "@/api";
+import { AxiosError } from "axios";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -50,23 +51,23 @@ export default function RegisterForm() {
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (data: RegisterFormValues) => {
+    mutationFn: async (data: RegisterFormValues) => {
       const transformedData = camelToSnakeCase(data);
-
-      return apiRequest<Response>(
+      const response = await api.post<Response<null>>(
         ENDPOINTS.auth.register,
-        HTTP_METHODS.POST,
-        transformedData,
+        transformedData
       );
+      console.log(response);
+      return response.data.message;
     },
-    onSuccess: (res: Response) => {
-      toast({ description: res.message });
+    onSuccess: (message: string) => {
+      toast({ description: message });
       navigate("/login");
     },
-    onError: (error: Error) => {
+    onError: (error: AxiosError<Error>) => {
       toast({
         variant: "destructive",
-        description: error.message,
+        description: error.response?.data.message,
       });
     },
   });
@@ -161,8 +162,8 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-
           <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending && <Loader2 className="animate-spin mr-4" />}
             {isPending ? "Signing up..." : "Sign up"}
           </Button>
         </form>

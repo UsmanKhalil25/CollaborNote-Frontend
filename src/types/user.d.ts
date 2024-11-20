@@ -5,5 +5,7 @@ export interface User {
   friend_requests_sent: string[];
   friends: string[];
   last_name: string;
+  avatar?: string;
+  isOnline?: boolean;
   _id: string;
 }

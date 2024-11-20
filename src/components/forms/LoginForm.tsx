@@ -21,16 +21,9 @@ import { Input } from "@/components/ui/input.tsx";
 import AuthCard from "@/components/AuthCard.tsx";
 
 import { AuthContext } from "@/auth/auth-context.ts";
-import { apiRequest } from "@/api/api-config.ts";
-import { HTTP_METHODS } from "@/constants";
 import { ENDPOINTS } from "@/config/api-config.ts";
-
-interface LoginResponse {
-  data: {
-    access_token: string;
-  };
-  message: string;
-}
+import { api } from "@/api";
+import { AxiosError } from "axios";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -44,6 +37,10 @@ const defaultValues: Partial<LoginFormValues> = {
   password: "",
 };
 
+interface LoginData {
+  access_token: string;
+}
+
 export default function LoginForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -54,25 +51,28 @@ export default function LoginForm() {
     defaultValues,
   });
 
-  const { mutate, isPending } = useMutation<
-    LoginResponse,
-    Error,
-    LoginFormValues
-  >({
-    mutationFn: (data: LoginFormValues) =>
-      apiRequest<LoginResponse>(ENDPOINTS.auth.login, HTTP_METHODS.POST, data),
-    onSuccess: (res: LoginResponse) => {
-      auth?.setToken(res.data.access_token);
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: LoginFormValues) => {
+      const response = await api.post<Response<LoginData>>(
+        ENDPOINTS.auth.login,
+        data
+      );
+      return response.data.data.access_token;
+    },
+    onSuccess: (accessToken: string) => {
+      auth?.setToken(accessToken);
 
       toast({
-        description: res.message,
+        description: "Login successful",
       });
       navigate("/");
     },
-    onError: (error: Error) => {
+    onError: (error: AxiosError<Error>) => {
+      const errorMessage = error.response?.data.message || error.message;
+
       toast({
         variant: "destructive",
-        description: error.message,
+        description: errorMessage,
       });
     },
   });
