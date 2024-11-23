@@ -29,8 +29,9 @@ export default function ListCardContainer({
   children,
 }: ListCardProps) {
   const handleCheckChange = (check: boolean) => {
-    if (!setShowFilteredOnly) return;
-    setShowFilteredOnly(check);
+    if (setShowFilteredOnly) {
+      setShowFilteredOnly(check);
+    }
   };
 
   if (showFilter) {

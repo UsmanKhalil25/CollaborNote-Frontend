@@ -6,6 +6,6 @@ export interface User {
   friends: string[];
   last_name: string;
   avatar?: string;
-  isOnline?: boolean;
+  isOnline: boolean;
   _id: string;
 }

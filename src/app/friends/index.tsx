@@ -40,11 +40,10 @@ export default function FriendsPage() {
             label: "Online",
             showFilteredOnly: showOnlineOnly,
             setShowFilteredOnly: setShowOnlineOnly,
-            filterFn: (friend: User) => friend.isOnline,
+            filterFn: (friend: User) => friend.isOnline ?? false,
           }}
           emptyMessage="You have no friends."
         />
-
         <ListCardWithQuery<FriendRequest>
           title="Pending Friend Requests"
           description="Review and respond to friend requests."

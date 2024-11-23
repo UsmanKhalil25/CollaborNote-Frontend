@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import ListCardContainer from "@/components/ListCardContainer";
@@ -15,7 +15,7 @@ interface ListCardWithQueryProps<T> {
     label: string;
     showFilteredOnly: boolean;
     setShowFilteredOnly: (value: boolean) => void;
-    filterFn: (item: T) => boolean | undefined;
+    filterFn: (item: T) => boolean;
   };
   emptyMessage: string;
   skeletonCount?: number;
@@ -36,11 +36,13 @@ export function ListCardWithQuery<T>({
     queryFn,
   });
 
-  const filteredData = filter
-    ? data?.filter((item) =>
-        filter.showFilteredOnly ? filter.filterFn(item) : true
-      )
-    : data;
+  const filteredData = useMemo(() => {
+    if (!filter || !data) return data;
+
+    return data.filter((item) =>
+      filter.showFilteredOnly ? filter.filterFn(item) : true
+    );
+  }, [data, filter?.showFilteredOnly, filter?.filterFn]);
 
   if (isLoading) {
     return (
@@ -64,7 +66,7 @@ export function ListCardWithQuery<T>({
     );
   }
 
-  if (!filteredData?.length) {
+  if (!filteredData?.length && !filter) {
     return (
       <ListCardContainer title={title} description={description}>
         <div className="h-72 flex justify-center items-center">
