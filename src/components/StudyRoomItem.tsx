@@ -1,11 +1,12 @@
 import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { RecentActivity } from "@/types/activity";
+import { StudyRoom } from "@/types/study-room";
+import { Badge } from "@/components/ui/badge";
 
-interface RecentActivityItemProps {
-  item: RecentActivity;
+interface StudyRoomItemProps {
+  item: StudyRoom;
 }
 
-export default function RecentActivityItem({ item }: RecentActivityItemProps) {
+export function StudyRoomItem({ item }: StudyRoomItemProps) {
   return (
     <div
       key={item.id}
@@ -15,20 +16,23 @@ export default function RecentActivityItem({ item }: RecentActivityItemProps) {
         <div className="flex items-center">
           <div className="flex items-center gap-2">
             <div className="font-semibold">{item.name}</div>
-            {!item.read && (
-              <span className="flex h-2 w-2 rounded-full bg-blue-600" />
-            )}
+            {true && <span className="flex h-2 w-2 rounded-full bg-blue-600" />}
           </div>
           <div className="ml-auto text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(item.date), {
+            {formatDistanceToNow(new Date(item.createdAt), {
               addSuffix: true,
             })}
           </div>
         </div>
-        <div className="text-xs font-medium">{item.subject}</div>
+        <div className="line-clamp-2 text-xs text-muted-foreground">
+          {item.description.substring(0, 300)}
+        </div>
       </div>
-      <div className="line-clamp-2 text-xs text-muted-foreground">
-        {item.text.substring(0, 300)}
+
+      <div className="flex gap-3 overflow-x-auto">
+        {item.participants.map((item) => (
+          <Badge>{item.firstName}</Badge>
+        ))}
       </div>
     </div>
   );

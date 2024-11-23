@@ -4,4 +4,5 @@ export interface RecentActivity {
   date: string;
   subject: string;
   text: string;
+  read: boolean;
 }

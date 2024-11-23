@@ -10,7 +10,7 @@ export default function DashboardLayout() {
         <div className="flex justify-end">
           <UserNav />
         </div>
-        <div className="px-4">
+        <div className="px-4 h-full">
           <Outlet />
         </div>
       </div>

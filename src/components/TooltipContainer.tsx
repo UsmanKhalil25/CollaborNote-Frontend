@@ -7,14 +7,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface TooltipWrapperProps {
+interface TooltipContainerProps {
   children: ReactNode;
   label: string;
 }
-export default function TooltipWrapper({
+export default function TooltipContainer({
   children,
   label,
-}: TooltipWrapperProps) {
+}: TooltipContainerProps) {
   return (
     <TooltipProvider>
       <Tooltip>
