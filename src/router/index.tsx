@@ -7,11 +7,14 @@ import RootLayout from "@/components/layouts/RootLayout";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import SettingsLayout from "@/components/layouts/SettingsLayout";
 
-import Home from "@/app/home";
-import Friends from "@/app/friends";
-import Login from "@/app/login";
-import NotFound from "@/app/not-found";
-import Register from "@/app/register";
+import LoginPage from "@/app/login";
+import RegisterPage from "@/app/register";
+import NotFoundPage from "@/app/not-found";
+import DashboardPage from "@/app/dashboard";
+import StudyRoomsPage from "@/app/study-rooms";
+import StudyRoomDetailsPage from "@/app/study-rooms/[roomId]";
+import OngoingStudyRoomPage from "@/app/study-rooms/ongoing/[roomId]";
+import FriendsPage from "@/app/friends";
 
 import SettingsAccount from "@/app/settings/account";
 import SettingsProfile from "@/app/settings/profile";
@@ -44,7 +47,7 @@ export default function Router() {
             path="login"
             element={
               <PublicRoute>
-                <Login />
+                <LoginPage />
               </PublicRoute>
             }
           />
@@ -52,16 +55,25 @@ export default function Router() {
             path="register"
             element={
               <PublicRoute>
-                <Register />
+                <RegisterPage />
               </PublicRoute>
             }
           />
-
           <Route element={<PrivateRoute />}>
             <Route element={<DashboardLayout />}>
-              <Route index element={<Home />} />
-              <Route path="friends" element={<Friends />} />
+              <Route index element={<DashboardPage />} />
+              <Route path="study-rooms" element={<StudyRoomsPage />} />
+              <Route
+                path="study-rooms/:roomId"
+                element={<StudyRoomDetailsPage />}
+              />
+              <Route path="friends" element={<FriendsPage />} />
             </Route>
+
+            <Route
+              path="study-rooms/ongoing/:roomId"
+              element={<OngoingStudyRoomPage />}
+            />
 
             <Route path="settings" element={<SettingsLayout />}>
               <Route index element={<Navigate to="profile" replace />} />
@@ -70,7 +82,7 @@ export default function Router() {
               <Route path="open-ai" element={<SettingsOpenAI />} />
             </Route>
           </Route>
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
       <Toaster />

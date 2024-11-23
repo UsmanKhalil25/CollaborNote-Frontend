@@ -6,7 +6,7 @@ export default function MainSidebar() {
 
   const ROUTES = [
     { label: "Dashboard", path: "/", icon: Home },
-    { label: "Notes", path: "/notes", icon: Pen },
+    { label: "Study Rooms", path: "/study-rooms", icon: Pen },
     { label: "Friends", path: "/friends", icon: Users },
   ];
 

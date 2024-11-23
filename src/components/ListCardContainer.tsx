@@ -19,7 +19,7 @@ interface ListCardProps {
   children: ReactNode;
 }
 
-export default function ListCard({
+export default function ListCardContainer({
   title,
   description,
   showFilter = false,
