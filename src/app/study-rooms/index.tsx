@@ -14,6 +14,14 @@ import { ENDPOINTS } from "@/config/api-config";
 import { convertToCamelCase } from "@/lib/utils";
 
 export default function StudyRoomsPage() {
+  const studyRoomQueryFn = async () => {
+    const response = await api.get<
+      Response<{ study_rooms: IStudyRoomListingOut[] }>
+    >(ENDPOINTS.studyRooms.index);
+    const data = response.data.data.study_rooms;
+    return convertToCamelCase(data);
+  };
+
   const invitationQueryFn = async () => {
     const response = await api.get<
       Response<{ invitations: IInvitationListingOut[] }>
@@ -36,12 +44,7 @@ export default function StudyRoomsPage() {
           title="Study Rooms"
           description="You are currently enrolled in 20 active study rooms."
           queryKey={[QUERY.STUDY_ROOMS]}
-          queryFn={async () => {
-            const response = await api.get<
-              Response<{ study_rooms: IStudyRoomListingOut[] }>
-            >(ENDPOINTS.studyRooms.index);
-            return response.data.data.study_rooms;
-          }}
+          queryFn={studyRoomQueryFn}
           listItem={(studyRoom: IStudyRoomListingOut) => (
             <StudyRoomItem key={studyRoom.id} studyRoom={studyRoom} />
           )}

@@ -1,6 +1,7 @@
-import { formatDistanceToNow } from "date-fns/formatDistanceToNow";
-import { IStudyRoomListingOut } from "@/types/study-room";
 import { Badge } from "@/components/ui/badge";
+
+import { IStudyRoomListingOut } from "@/types/study-room";
+import { timeAgo } from "@/lib/utils";
 
 interface StudyRoomItemProps {
   studyRoom: IStudyRoomListingOut;
@@ -16,9 +17,7 @@ export function StudyRoomItem({ studyRoom }: StudyRoomItemProps) {
             {true && <span className="flex h-2 w-2 rounded-full bg-blue-600" />}
           </div>
           <div className="ml-auto text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(studyRoom.created_at), {
-              addSuffix: true,
-            })}
+            {timeAgo(studyRoom.createdAt)}
           </div>
         </div>
         <div className="line-clamp-2 text-xs text-muted-foreground">
