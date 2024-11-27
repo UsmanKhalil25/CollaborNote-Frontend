@@ -1,15 +1,20 @@
-export interface Participant {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-}
+import { ParticipantOut, Participant } from "@/types/participant";
 
-export interface StudyRoom {
+export interface IStudyRoomListingOut {
   id: string;
   name: string;
   description: string;
-  ownerEmail: string;
+  created_at: Date;
+  participants: ParticipantOut[];
+}
+
+export interface StudyRoom {
+  id?: string;
+  name: string;
+  description: string;
   participants: Participant[];
-  createdAt: string;
+  content: string;
+  is_active: boolean;
+  created_at: Date;
+  ended_at?: Date;
 }

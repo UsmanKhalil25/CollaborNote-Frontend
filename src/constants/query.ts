@@ -4,4 +4,6 @@ export const QUERY = {
   FRIEND_REQUESTS: "friend-requests",
   LOGIN: "login",
   REGISTER: "regsiter",
+  STUDY_ROOMS: "study-rooms",
+  INVITATIONS: "invitations",
 };

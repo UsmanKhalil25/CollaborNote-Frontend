@@ -5,12 +5,12 @@ import ListCardContainer from "@/components/ListCardContainer";
 import UserInfoSkeleton from "@/components/UserInfoSkeleton";
 import { ScrollableContainer } from "@/components/ScrollableContainer";
 
-interface ListCardWithQueryProps<T> {
+interface ListCardProps<T> {
   title: string;
   description: string;
   queryKey: string[];
   queryFn: () => Promise<T[]>;
-  renderItem: (item: T) => ReactNode;
+  listItem: (item: T) => ReactNode;
   filter?: {
     label: string;
     showFilteredOnly: boolean;
@@ -19,18 +19,22 @@ interface ListCardWithQueryProps<T> {
   };
   emptyMessage: string;
   skeletonCount?: number;
+  className?: string;
+  skeleton?: ReactNode;
 }
 
-export function ListCardWithQuery<T>({
+export function ListCard<T>({
   title,
   description,
   queryKey,
   queryFn,
-  renderItem,
+  listItem,
   filter,
   emptyMessage,
   skeletonCount = 5,
-}: ListCardWithQueryProps<T>) {
+  className,
+  skeleton = <UserInfoSkeleton />,
+}: ListCardProps<T>) {
   const { data, error, isLoading } = useQuery<T[]>({
     queryKey,
     queryFn,
@@ -46,10 +50,14 @@ export function ListCardWithQuery<T>({
 
   if (isLoading) {
     return (
-      <ListCardContainer title={title} description={description}>
+      <ListCardContainer
+        className={className}
+        title={title}
+        description={description}
+      >
         <ScrollableContainer>
           {Array.from({ length: skeletonCount }).map((_, index) => (
-            <UserInfoSkeleton key={index} />
+            <div key={index}>{skeleton}</div>
           ))}
         </ScrollableContainer>
       </ListCardContainer>
@@ -58,7 +66,11 @@ export function ListCardWithQuery<T>({
 
   if (error) {
     return (
-      <ListCardContainer title={title} description={description}>
+      <ListCardContainer
+        className={className}
+        title={title}
+        description={description}
+      >
         <div className="h-72 flex justify-center items-center">
           <p className="text-destructive-foreground">Error loading data.</p>
         </div>
@@ -68,7 +80,11 @@ export function ListCardWithQuery<T>({
 
   if (!filteredData?.length && !filter) {
     return (
-      <ListCardContainer title={title} description={description}>
+      <ListCardContainer
+        className={className}
+        title={title}
+        description={description}
+      >
         <div className="h-72 flex justify-center items-center">
           <p className="text-muted-foreground">{emptyMessage}</p>
         </div>
@@ -78,6 +94,7 @@ export function ListCardWithQuery<T>({
 
   return (
     <ListCardContainer
+      className={className}
       title={title}
       description={description}
       showFilter={!!filter}
@@ -85,7 +102,7 @@ export function ListCardWithQuery<T>({
       showFilteredOnly={filter?.showFilteredOnly}
       setShowFilteredOnly={filter?.setShowFilteredOnly}
     >
-      <ScrollableContainer>{filteredData?.map(renderItem)}</ScrollableContainer>
+      <ScrollableContainer>{filteredData?.map(listItem)}</ScrollableContainer>
     </ListCardContainer>
   );
 }

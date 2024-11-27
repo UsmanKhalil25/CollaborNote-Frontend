@@ -20,6 +20,24 @@ export const camelToSnakeCase = (obj: Record<string, any>) => {
   return newObj;
 };
 
+const toCamelCase = (str: string) => {
+  return str.replace(/_([a-z])/g, (match, group1) => group1.toUpperCase());
+};
+
+export const convertToCamelCase = (obj: any): any => {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertToCamelCase(item));
+  } else if (obj !== null && typeof obj === "object") {
+    const result: Record<string, any> = {};
+    for (const key in obj) {
+      const camelKey = toCamelCase(key);
+      result[camelKey] = convertToCamelCase(obj[key]);
+    }
+    return result;
+  }
+  return obj;
+};
+
 export function timeAgo(isoTimestamp: string) {
   const timestamp = new Date(isoTimestamp);
   return formatDistanceToNow(timestamp, { addSuffix: true });

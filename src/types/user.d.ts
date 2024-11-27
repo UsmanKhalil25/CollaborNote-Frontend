@@ -9,3 +9,9 @@ export interface User {
   isOnline: boolean;
   _id: string;
 }
+
+export interface IUserInfo {
+  email: string;
+  firstName: string;
+  lastName: string;
+}

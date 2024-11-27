@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import { TypographyH2 } from "@/components/ui/typography-h2.tsx";
 
-import AddFriendDialogue from "@/components/AddFriendDialogue.tsx";
-import { ListCardWithQuery } from "@/components/ListCardWithQuery";
+import { AddFriendDialog } from "@/components/AddFriendDialog";
+import { ListCard } from "@/components/ListCard";
 import { FriendRequestItem } from "@/components/FriendRequestItem";
 
 import { FriendRequest } from "@/types/friend-request";
@@ -20,10 +20,10 @@ export default function FriendsPage() {
     <div className="h-full space-y-4">
       <div className="flex justify-between items-center">
         <TypographyH2 text={"Manage your Friends"} />
-        <AddFriendDialogue />
+        <AddFriendDialog />
       </div>
       <div className="h-[85%] grid gap-4 md:grid-cols-2 ">
-        <ListCardWithQuery<User>
+        <ListCard<User>
           title="Friend List"
           description="View your friends and their online status."
           queryKey={[QUERY.FRIENDS]}
@@ -33,7 +33,7 @@ export default function FriendsPage() {
             );
             return response.data.data.friends;
           }}
-          renderItem={(friend: User) => (
+          listItem={(friend: User) => (
             <FriendItem key={friend._id} friend={friend} />
           )}
           filter={{
@@ -44,7 +44,7 @@ export default function FriendsPage() {
           }}
           emptyMessage="You have no friends."
         />
-        <ListCardWithQuery<FriendRequest>
+        <ListCard<FriendRequest>
           title="Pending Friend Requests"
           description="Review and respond to friend requests."
           queryKey={[QUERY.FRIEND_REQUESTS]}
@@ -54,7 +54,7 @@ export default function FriendsPage() {
             >(ENDPOINTS.friendRequests.index("pending"));
             return response.data.data.friend_requests;
           }}
-          renderItem={(request: FriendRequest) => (
+          listItem={(request: FriendRequest) => (
             <FriendRequestItem key={request._id} friendRequest={request} />
           )}
           emptyMessage="You have no friend requests."

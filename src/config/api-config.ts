@@ -19,4 +19,27 @@ export const ENDPOINTS = {
     updateStatus: (requestId: string, newStatus: string) =>
       `${API_BASE_URL}/friend-requests/${requestId}/status?new_status=${newStatus}`,
   },
+
+  studyRooms: {
+    index: `${API_BASE_URL}/study-rooms`,
+    id: (studyRoomId: string) => `${API_BASE_URL}/study-rooms/${studyRoomId}`,
+    create: `${API_BASE_URL}/study-rooms`,
+    update: (studyRoomId: string) =>
+      `${API_BASE_URL}/study-rooms/${studyRoomId}`,
+    end: (studyRoomId: string) =>
+      `${API_BASE_URL}/study-rooms/${studyRoomId}/end`,
+    participants: {
+      add: (studyRoomId: string) =>
+        `${API_BASE_URL}/study-rooms/${studyRoomId}/participants`,
+      remove: (studyRoomId: string, participantId: string) =>
+        `${API_BASE_URL}/study-rooms/${studyRoomId}/participants/${participantId}`,
+      updatePermission: (studyRoomId: string, participantId: string) =>
+        `${API_BASE_URL}/study-rooms/${studyRoomId}/participants/${participantId}`,
+    },
+  },
+  invitations: {
+    index: `${API_BASE_URL}/invitations`,
+    updateStatus: (invitationId: string, newStatus: string) =>
+      `${API_BASE_URL}/invitations/${invitationId}/status?new_status=${newStatus}`,
+  },
 };

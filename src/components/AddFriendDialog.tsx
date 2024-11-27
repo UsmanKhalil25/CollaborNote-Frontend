@@ -25,7 +25,7 @@ interface SearchUserData {
   users: SearchUser[];
 }
 
-export default function AddFriendDialogue() {
+export function AddFriendDialog() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedQuery = useDebounce(searchQuery, 500);
 

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 
 interface ListCardProps {
+  className?: string;
   title: string;
   description: string;
   showFilter?: boolean;
@@ -20,6 +21,7 @@ interface ListCardProps {
 }
 
 export default function ListCardContainer({
+  className,
   title,
   description,
   showFilter = false,
@@ -36,7 +38,7 @@ export default function ListCardContainer({
 
   if (showFilter) {
     return (
-      <Card>
+      <Card className={className}>
         <CardHeader className="flex-row justify-between items-center">
           <div className="flex flex-col gap-2">
             <CardTitle>{title}</CardTitle>
@@ -57,7 +59,7 @@ export default function ListCardContainer({
   }
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
