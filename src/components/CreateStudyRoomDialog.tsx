@@ -1,9 +1,10 @@
-import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 import { HousePlus } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -14,54 +15,42 @@ import {
 } from "@/components/ui/dialog";
 
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useMutation } from "@tanstack/react-query";
+  CreateStudyRoomForm,
+  CreateStudyRoomFormValues,
+} from "@/components/forms/CreateStudyRoomForm";
+
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config";
 import { StudyRoom } from "@/types/study-room";
-import { AxiosError } from "axios";
-
-const studyRoomSchema = z.object({
-  name: z
-    .string()
-    .min(3, "Room name is required and must have at least 3 characters"),
-  description: z
-    .string()
-    .min(5, "Description is required and must have at least 5 characters"),
-});
-
-type CreateStudyRoomFormValues = z.infer<typeof studyRoomSchema>;
 
 export function CreateStudyRoomDialog() {
-  const form = useForm<CreateStudyRoomFormValues>({
-    resolver: zodResolver(studyRoomSchema),
-  });
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: CreateStudyRoomFormValues) => {
       const response = await api.post<Response<{ study_room: StudyRoom }>>(
-        ENDPOINTS.auth.login,
+        ENDPOINTS.studyRooms.create,
         data
       );
       return response.data.data.study_room;
     },
-    onSuccess: (roomData: StudyRoom) => {},
+    onSuccess: (roomData: StudyRoom) => {
+      const roomId = roomData.id;
+      navigate(`/study-rooms/verify/${roomId}`);
+    },
     onError: (error: AxiosError<Error>) => {
       const errorMessage = error.response?.data.message || error.message;
+      toast({
+        variant: "destructive",
+        description: errorMessage,
+      });
     },
   });
 
-  function onSubmit(data: CreateStudyRoomFormValues) {
+  const onSubmit = (data: CreateStudyRoomFormValues) => {
     mutate(data);
-  }
+  };
 
   return (
     <Dialog>
@@ -78,39 +67,7 @@ export function CreateStudyRoomDialog() {
             Provide the name and description to create a new study room.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Creating..." : "Create"}
-            </Button>
-          </form>
-        </Form>
+        <CreateStudyRoomForm onSubmit={onSubmit} isPending={isPending} />
       </DialogContent>
     </Dialog>
   );

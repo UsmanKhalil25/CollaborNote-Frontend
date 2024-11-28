@@ -1,59 +1,47 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { Users } from "lucide-react";
 import { Excalidraw } from "@excalidraw/excalidraw";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
 } from "@excalidraw/excalidraw/types/types";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
-import { Button } from "@/components/ui/button";
-import ExcalidrawMainMenu from "@/components/ExcalidrawMainMenu";
-import CollabrationCard from "@/components/CollaborationCard";
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const useWebSocket = (onDataReceived: (data: any) => void) => {
-  const socketRef = useRef<WebSocket | null>(null);
-  const [messages, setMessages] = useState<string[]>([]);
+import ExcalidrawMainMenu from "@/components/ExcalidrawMainMenu";
+import InviteAndShareCard from "@/components/InviteAndShareCard";
+import { SendInviteDialog } from "@/components/SendInviteDialog";
 
-  const sendMessage = (message: string) => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(message);
-    }
+import { ParticipantOut } from "@/types/participant";
+import { AuthContext } from "@/auth/auth-context";
+
+interface IStudyRoomSocketResponse {
+  type: string;
+  data: {
+    content: string;
+    editorId: string;
+    studyRoomId: string;
   };
+}
 
-  useEffect(() => {
-    // Initialize WebSocket connection
-    socketRef.current = new WebSocket("ws://localhost:8000/ws/collaboration");
+export default function StudyRoomOngoingPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const auth = useContext(AuthContext);
 
-    socketRef.current.onopen = () => {
-      console.log("WebSocket connection established");
-    };
+  const roomData = location.state?.roomData;
 
-    socketRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setMessages((prevMessages) => [...prevMessages, data]); // Append received messages
+  if (!roomData) {
+    navigate("/not-found");
+    return null;
+  }
 
-      // Call the callback function to handle received data
-      onDataReceived(data);
-    };
-
-    socketRef.current.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    return () => {
-      socketRef.current?.close(); // Close the WebSocket connection on component unmount
-    };
-  }, [onDataReceived]);
-
-  return { sendMessage, messages };
-};
-
-export default function OngoingStudyRoomPage() {
   const INITIAL_BACKGROUND_COLOR: string = "#f8f9fa";
   const EXCALIDRAW_INITIAL_DATA: ExcalidrawInitialDataState = {
     appState: {
@@ -64,27 +52,105 @@ export default function OngoingStudyRoomPage() {
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
-  const handleReceivedData = (data: readonly ExcalidrawElement[]) => {
-    console.log("received data: ", data);
+  const websocketRef = useRef<WebSocket | null>(null);
 
-    if (Array.isArray(data) && data.length > 0) {
-      excalidrawAPI?.updateScene({ elements: data });
+  const handleReceivedData = (data: IStudyRoomSocketResponse) => {
+    try {
+      const parsedElements = JSON.parse(
+        data.data.content
+      ) as ExcalidrawElement[];
+      if (Array.isArray(parsedElements)) {
+        excalidrawAPI?.updateScene({ elements: parsedElements });
+      }
+    } catch (error) {
+      console.error("Error parsing received data", error);
     }
   };
 
-  const { sendMessage } = useWebSocket(handleReceivedData);
+  useEffect(() => {
+    if (!auth?.user?._id) return;
+
+    const socket = new WebSocket(
+      `ws://localhost:8000/api/study-rooms/ws?user_id=${auth.user._id}`
+    );
+    websocketRef.current = socket;
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Received data:", data);
+      handleReceivedData(data);
+    };
+
+    socket.onclose = (event) => {
+      console.log("WebSocket closed:", event);
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
+  }, [auth?.user?._id]);
 
   const debounceTimeoutRef = useRef<number | null>(null);
 
+  const sendMessage = (message: any) => {
+    if (
+      websocketRef.current &&
+      websocketRef.current.readyState === WebSocket.OPEN
+    ) {
+      websocketRef.current.send(JSON.stringify(message));
+    } else {
+      console.warn("WebSocket is not open. Message not sent.");
+    }
+  };
+
   const handleChange = (data: readonly ExcalidrawElement[]) => {
-    console.log("Data sending: ", data);
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
     debounceTimeoutRef.current = window.setTimeout(() => {
-      sendMessage(JSON.stringify(data));
-    }, 300);
+      const obj = {
+        type: "document_update",
+        data: {
+          study_room_id: roomData.id,
+          content: JSON.stringify(data),
+        },
+      };
+      sendMessage(obj);
+    }, 200);
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const navigationEntries = performance.getEntriesByType("navigation");
+      if (navigationEntries.length > 0) {
+        const navigationEntry = navigationEntries[0];
+
+        if (navigationEntry instanceof PerformanceNavigationTiming) {
+          const isReload = navigationEntry.type === "reload";
+
+          if (isReload) {
+            console.log("Page is being reloaded");
+          } else {
+            event.preventDefault();
+            event.returnValue =
+              "You are about to leave the room. Your progress may not be saved.";
+          }
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <div className="h-screen relative">
@@ -94,7 +160,15 @@ export default function OngoingStudyRoomPage() {
         isCollaborating={true}
         onChange={handleChange}
         excalidrawAPI={(api) => setExcalidrawAPI(api)}
-        renderTopRightUI={() => <CollabrationTrigger />}
+        renderTopRightUI={() => (
+          <div className="flex items-center gap-4">
+            <InviteAndShareTrigger
+              roomId={roomData.id}
+              participants={roomData?.participants}
+            />
+            <SendInviteDialog />
+          </div>
+        )}
       >
         <ExcalidrawMainMenu />
       </Excalidraw>
@@ -102,16 +176,22 @@ export default function OngoingStudyRoomPage() {
   );
 }
 
-function CollabrationTrigger() {
+interface InviteAndShareTriggerProps {
+  roomId: string;
+  participants: ParticipantOut[];
+}
+
+function InviteAndShareTrigger({
+  roomId,
+  participants,
+}: InviteAndShareTriggerProps) {
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="secondary">
-          <Users className="w-4 h-4 text-mute" />
-        </Button>
+        <Users className="w-4 h-4 text-mute" />
       </PopoverTrigger>
       <PopoverContent className="w-fit">
-        <CollabrationCard />
+        <InviteAndShareCard roomId={roomId} participants={participants} />
       </PopoverContent>
     </Popover>
   );

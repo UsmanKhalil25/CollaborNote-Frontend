@@ -21,7 +21,7 @@ export const camelToSnakeCase = (obj: Record<string, any>) => {
 };
 
 const toCamelCase = (str: string) => {
-  return str.replace(/_([a-z])/g, (match, group1) => group1.toUpperCase());
+  return str.replace(/_([a-z])/g, (_, group1) => group1.toUpperCase());
 };
 
 export const convertToCamelCase = (obj: any): any => {

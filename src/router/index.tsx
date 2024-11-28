@@ -13,7 +13,9 @@ import NotFoundPage from "@/app/not-found";
 import DashboardPage from "@/app/dashboard";
 import StudyRoomsPage from "@/app/study-rooms";
 import StudyRoomDetailsPage from "@/app/study-rooms/[roomId]";
-import OngoingStudyRoomPage from "@/app/study-rooms/ongoing/[roomId]";
+import StudyRoomOngoingPage from "@/app/study-rooms/ongoing/[roomId]";
+import StudyRoomVerifyPage from "@/app/study-rooms/verify/[roomId]";
+import StudyRoomNotFound from "@/app/study-rooms/not-found";
 import FriendsPage from "@/app/friends";
 
 import SettingsAccount from "@/app/settings/account";
@@ -72,7 +74,16 @@ export default function Router() {
 
             <Route
               path="study-rooms/ongoing/:roomId"
-              element={<OngoingStudyRoomPage />}
+              element={<StudyRoomOngoingPage />}
+            />
+            <Route
+              path="study-rooms/verify/:roomId"
+              element={<StudyRoomVerifyPage />}
+            />
+
+            <Route
+              path="study-rooms/not-found"
+              element={<StudyRoomNotFound />}
             />
 
             <Route path="settings" element={<SettingsLayout />}>

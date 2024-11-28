@@ -57,7 +57,6 @@ export default function RegisterForm() {
         ENDPOINTS.auth.register,
         transformedData
       );
-      console.log(response);
       return response.data.message;
     },
     onSuccess: (message: string) => {

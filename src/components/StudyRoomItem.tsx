@@ -26,8 +26,8 @@ export function StudyRoomItem({ studyRoom }: StudyRoomItemProps) {
       </div>
 
       <div className="flex gap-3 overflow-x-auto">
-        {studyRoom.participants.map((participant) => (
-          <Badge key={participant.user_id}>{participant.first_name}</Badge>
+        {studyRoom.participants.map((participant, index) => (
+          <Badge key={index}>{participant.firstName}</Badge>
         ))}
       </div>
     </div>

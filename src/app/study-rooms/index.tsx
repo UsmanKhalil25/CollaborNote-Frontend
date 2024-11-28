@@ -28,7 +28,6 @@ export default function StudyRoomsPage() {
     >(ENDPOINTS.invitations.index);
     const data = response.data.data.invitations;
     const camelCaseData = convertToCamelCase(data);
-    console.log(camelCaseData);
     return camelCaseData;
   };
 

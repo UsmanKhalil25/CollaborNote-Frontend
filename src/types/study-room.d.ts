@@ -14,7 +14,7 @@ export interface StudyRoom {
   description: string;
   participants: Participant[];
   content: string;
-  is_active: boolean;
-  created_at: Date;
-  ended_at?: Date;
+  isActive: boolean;
+  createdAt: Date;
+  endedAt?: Date;
 }

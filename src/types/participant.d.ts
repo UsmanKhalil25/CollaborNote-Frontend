@@ -1,17 +1,17 @@
 export enum Permission {
-  can_edit = "can_edit",
-  can_view = "can_view",
+  CAN_VIEW = "canView",
+  CAN_EDIT = "canEdit",
 }
 
 export interface Participant {
-  user_id: string;
-  is_owner: Boolean;
-  is_active: Boolean;
+  userId: string;
+  isOwner: boolean;
+  isActive: boolean;
   permission: Permission;
 }
 
 export interface ParticipantOut extends Participant {
   email: string;
-  first_name: string;
-  second_name: string;
+  firstName: string;
+  secondName: string;
 }
