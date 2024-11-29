@@ -13,11 +13,11 @@ import { QUERY } from "@/constants";
 import TooltipContainer from "./TooltipContainer";
 import { timeAgo } from "@/lib/utils";
 
-interface FriendRequestProps {
+interface FriendRequestItemProps {
   friendRequest: FriendRequest;
 }
 
-export function FriendRequestItem({ friendRequest }: FriendRequestProps) {
+export function FriendRequestItem({ friendRequest }: FriendRequestItemProps) {
   const queryClient = useQueryClient();
   const { _id, sender, created_at } = friendRequest;
   const { first_name, last_name, email, avatar } = sender;
@@ -78,7 +78,7 @@ export function FriendRequestItem({ friendRequest }: FriendRequestProps) {
             variant="outline"
             disabled={isPending}
           >
-            <Ban className="w-4 h-4 " />
+            <Ban className="w-4 h-4" />
           </Button>
         </div>
       </div>

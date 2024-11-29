@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -13,29 +13,30 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-import UserList from "@/components/UserList";
-
 import useDebounce from "@/hooks/use-debounce";
 import { QUERY } from "@/constants";
 import { ENDPOINTS } from "@/config/api-config";
 import { api } from "@/api";
-import { SearchUser } from "@/types/search-user";
+import { IInvitationSearchItem } from "@/types/invitation";
+import InviteUserList from "./InviteUserList";
+import { convertToCamelCase } from "@/lib/utils";
 
-interface SearchUserData {
-  users: SearchUser[];
+interface SendInviteDialogProps {
+  roomId: string;
 }
 
-export function SendInviteDialog() {
+export function SendInviteDialog({ roomId }: SendInviteDialogProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-  const { data: fetchedUsers, isLoading } = useQuery<SearchUser[]>({
-    queryKey: [QUERY.USERS, debouncedQuery],
-    queryFn: async (): Promise<SearchUser[]> => {
-      const response = await api.get<Response<SearchUserData>>(
-        ENDPOINTS.users.search(debouncedQuery)
-      );
-      return response.data.data.users;
+  const { data: fetchedUsers, isLoading } = useQuery({
+    queryKey: [QUERY.STUDY_ROOMS, debouncedQuery],
+    queryFn: async () => {
+      const response = await api.get<
+        Response<{ users: IInvitationSearchItem[] }>
+      >(ENDPOINTS.studyRooms.search(roomId, debouncedQuery));
+      const data = response.data.data.users;
+      return convertToCamelCase(data);
     },
     enabled: !!debouncedQuery,
   });
@@ -43,15 +44,16 @@ export function SendInviteDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">
-          <Send className="w-4 h-4 text-mute" />
+        <Button className="flex items-center gap-2" variant="outline">
+          Send Invite
+          <UserPlus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Send invite</DialogTitle>
           <DialogDescription>
-            Add friends to collaborate with.
+            Invite your friends to collaborate with.
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +67,7 @@ export function SendInviteDialog() {
           />
         </div>
         <div className="h-72 flex justify-center items-start">
-          <UserList
+          <InviteUserList
             users={fetchedUsers}
             isLoading={isLoading}
             searchQuery={searchQuery}

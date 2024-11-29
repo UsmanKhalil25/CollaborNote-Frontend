@@ -36,6 +36,8 @@ export const ENDPOINTS = {
       updatePermission: (studyRoomId: string, participantId: string) =>
         `${API_BASE_URL}/study-rooms/${studyRoomId}/participants/${participantId}`,
     },
+    search: (studyRoomId: string, searchQuery: string) =>
+      `${API_BASE_URL}/study-rooms/${studyRoomId}/invitations/search?query=${searchQuery}`,
   },
   invitations: {
     index: `${API_BASE_URL}/invitations`,

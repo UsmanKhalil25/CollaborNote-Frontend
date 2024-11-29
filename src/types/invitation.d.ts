@@ -7,7 +7,7 @@ export enum InvitationStatus {
   DECLINED = "DECLINED",
 }
 
-interface IInvitationListingOut {
+export interface IInvitationListingOut {
   id: string;
   studyRoomId: string;
   invitedUserId: string;
@@ -17,4 +17,15 @@ interface IInvitationListingOut {
   respondedAt?: string | null;
   inviterUserInfo: IUserInfo;
   studyRoomInfo: IStudyRoomListingOut;
+}
+
+export interface IInvitationSearchItem {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  inviteSent: boolean;
+  isParticipant: boolean;
+  invitationStatus: InvitationStatus;
 }

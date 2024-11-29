@@ -25,3 +25,9 @@ yarn-error.log*
 # IDEs
 .idea
 .env
+
+# sonar-cube
+.scannerwork
+sonarqube/extensions
+sonarqube/data
+sonarqube/logs

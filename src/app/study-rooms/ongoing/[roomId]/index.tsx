@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useContext } from "react";
-import { Users } from "lucide-react";
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -8,17 +7,9 @@ import {
 } from "@excalidraw/excalidraw/types/types";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
 import ExcalidrawMainMenu from "@/components/ExcalidrawMainMenu";
-import InviteAndShareCard from "@/components/InviteAndShareCard";
 import { SendInviteDialog } from "@/components/SendInviteDialog";
-
-import { ParticipantOut } from "@/types/participant";
+import { InviteAndShareTrigger } from "@/components/InviteAndShareTrigger";
 import { AuthContext } from "@/auth/auth-context";
 
 interface IStudyRoomSocketResponse {
@@ -29,6 +20,13 @@ interface IStudyRoomSocketResponse {
     studyRoomId: string;
   };
 }
+
+const INITIAL_BACKGROUND_COLOR: string = "#f8f9fa";
+const EXCALIDRAW_INITIAL_DATA: ExcalidrawInitialDataState = {
+  appState: {
+    viewBackgroundColor: INITIAL_BACKGROUND_COLOR,
+  },
+};
 
 export default function StudyRoomOngoingPage() {
   const location = useLocation();
@@ -42,31 +40,10 @@ export default function StudyRoomOngoingPage() {
     return null;
   }
 
-  const INITIAL_BACKGROUND_COLOR: string = "#f8f9fa";
-  const EXCALIDRAW_INITIAL_DATA: ExcalidrawInitialDataState = {
-    appState: {
-      viewBackgroundColor: INITIAL_BACKGROUND_COLOR,
-    },
-  };
-
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
 
   const websocketRef = useRef<WebSocket | null>(null);
-
-  const handleReceivedData = (data: IStudyRoomSocketResponse) => {
-    try {
-      const parsedElements = JSON.parse(
-        data.data.content
-      ) as ExcalidrawElement[];
-      if (Array.isArray(parsedElements)) {
-        excalidrawAPI?.updateScene({ elements: parsedElements });
-      }
-    } catch (error) {
-      console.error("Error parsing received data", error);
-    }
-  };
-
   useEffect(() => {
     if (!auth?.user?._id) return;
 
@@ -96,6 +73,19 @@ export default function StudyRoomOngoingPage() {
     };
   }, [auth?.user?._id]);
 
+  const handleReceivedData = (data: IStudyRoomSocketResponse) => {
+    try {
+      const parsedElements = JSON.parse(
+        data.data.content
+      ) as ExcalidrawElement[];
+      if (Array.isArray(parsedElements)) {
+        excalidrawAPI?.updateScene({ elements: parsedElements });
+      }
+    } catch (error) {
+      console.error("Error parsing received data", error);
+    }
+  };
+
   const debounceTimeoutRef = useRef<number | null>(null);
 
   const sendMessage = (message: any) => {
@@ -122,35 +112,8 @@ export default function StudyRoomOngoingPage() {
         },
       };
       sendMessage(obj);
-    }, 200);
+    }, 300);
   };
-
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      const navigationEntries = performance.getEntriesByType("navigation");
-      if (navigationEntries.length > 0) {
-        const navigationEntry = navigationEntries[0];
-
-        if (navigationEntry instanceof PerformanceNavigationTiming) {
-          const isReload = navigationEntry.type === "reload";
-
-          if (isReload) {
-            console.log("Page is being reloaded");
-          } else {
-            event.preventDefault();
-            event.returnValue =
-              "You are about to leave the room. Your progress may not be saved.";
-          }
-        }
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
 
   return (
     <div className="h-screen relative">
@@ -166,33 +129,12 @@ export default function StudyRoomOngoingPage() {
               roomId={roomData.id}
               participants={roomData?.participants}
             />
-            <SendInviteDialog />
+            <SendInviteDialog roomId={roomData.id} />
           </div>
         )}
       >
         <ExcalidrawMainMenu />
       </Excalidraw>
     </div>
-  );
-}
-
-interface InviteAndShareTriggerProps {
-  roomId: string;
-  participants: ParticipantOut[];
-}
-
-function InviteAndShareTrigger({
-  roomId,
-  participants,
-}: InviteAndShareTriggerProps) {
-  return (
-    <Popover>
-      <PopoverTrigger>
-        <Users className="w-4 h-4 text-mute" />
-      </PopoverTrigger>
-      <PopoverContent className="w-fit">
-        <InviteAndShareCard roomId={roomId} participants={participants} />
-      </PopoverContent>
-    </Popover>
   );
 }

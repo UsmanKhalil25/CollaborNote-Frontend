@@ -14,7 +14,11 @@ import { User } from "@/types/user";
 import { FriendItem } from "@/components/FriendItem";
 
 export default function FriendsPage() {
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [showOnlineOnly, setShowOnlineOnly] = useState<boolean>(false);
+
+  const handleToggleFilter = (value: boolean) => {
+    setShowOnlineOnly(value);
+  };
 
   return (
     <div className="h-full space-y-4">
@@ -39,10 +43,11 @@ export default function FriendsPage() {
           filter={{
             label: "Online",
             showFilteredOnly: showOnlineOnly,
-            setShowFilteredOnly: setShowOnlineOnly,
+            setShowFilteredOnly: handleToggleFilter,
             filterFn: (friend: User) => friend.isOnline ?? false,
           }}
           emptyMessage="You have no friends."
+          filterEmptyMessage="No online friend."
         />
         <ListCard<FriendRequest>
           title="Pending Friend Requests"
