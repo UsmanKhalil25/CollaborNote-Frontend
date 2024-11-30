@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import { MouseEvent } from "react";
 import { Ban, Check } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import TooltipContainer from "@/components/TooltipContainer";
 
@@ -11,14 +13,28 @@ import { IInvitationListingOut } from "@/types/invitation";
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { QUERY } from "@/constants";
 import { timeAgo } from "@/lib/utils";
-import { Button } from "./ui/button";
 
 interface InvitationItemProps {
   invitation: IInvitationListingOut;
 }
 
 export function InvitationItem({ invitation }: InvitationItemProps) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const { mutate: addParticipantMutation } = useMutation({
+    mutationFn: async () => {
+      await api.post(
+        ENDPOINTS.studyRooms.participants.add(invitation.studyRoomId)
+      );
+    },
+    onSuccess: () => {
+      const roomId = invitation.studyRoomId;
+      navigate(`/study-rooms/verify/${roomId}`);
+    },
+
+    onError: (error) => console.error("Error adding participant:", error),
+  });
 
   const { mutate: updateFriendRequest, isPending } = useMutation({
     mutationFn: async ({
@@ -36,10 +52,11 @@ export function InvitationItem({ invitation }: InvitationItemProps) {
       queryClient.invalidateQueries({
         queryKey: [QUERY.INVITATIONS],
       });
+      addParticipantMutation();
     },
 
     onError: (error) =>
-      console.error("Error updating friend request status:", error),
+      console.error("Error updating invitation status:", error),
   });
 
   const handleRequestAction = (
@@ -50,18 +67,15 @@ export function InvitationItem({ invitation }: InvitationItemProps) {
     updateFriendRequest({ invitation_id: invitation.id, newStatus: status });
   };
 
-  const numberOfParticipants = () => {
-    return invitation.studyRoomInfo.participants.length - 1;
-  };
-
   return (
     <TooltipContainer label={`Received ${timeAgo(invitation.createdAt)}`}>
       <div className="flex items-center justify-between space-x-4 cursor-pointer">
         <div className="flex flex-col gap-2 items-start">
           <div className="font-semibold">{invitation.studyRoomInfo.name}</div>
           <div className="flex gap-3 overflow-x-auto">
-            <Badge>{invitation.inviterUserInfo.firstName}</Badge>
-            {numberOfParticipants() && <Badge>+{numberOfParticipants()}</Badge>}
+            {invitation.studyRoomInfo.participants.map((participant) => (
+              <Badge>{participant.firstName}</Badge>
+            ))}
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -6,12 +6,14 @@ import { InviteUserItem } from "./InviteUserItem";
 
 interface InviteUserListProps {
   users?: IInvitationSearchItem[];
+  roomId: string;
   isLoading: boolean;
   searchQuery: string;
 }
 
 export default function InviteUserList({
   users,
+  roomId,
   isLoading,
   searchQuery,
 }: InviteUserListProps) {
@@ -49,10 +51,11 @@ export default function InviteUserList({
 
   return (
     <ScrollableContainer>
-      {users.map((friend) => (
+      {users.map((user) => (
         <InviteUserItem
-          key={friend.id}
-          user={friend}
+          key={user.id}
+          roomId={roomId}
+          user={user}
           searchQuery={searchQuery}
         />
       ))}

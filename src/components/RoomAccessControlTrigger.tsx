@@ -9,20 +9,23 @@ import {
 import InviteAndShareCard from "@/components/InviteAndShareCard";
 
 import { ParticipantOut } from "@/types/participant";
+import { Button } from "./ui/button";
 
-interface InviteAndShareTriggerProps {
+interface RoomAccessControlTriggerProps {
   roomId: string;
   participants: ParticipantOut[];
 }
 
-export function InviteAndShareTrigger({
+export function RoomAccessControlTrigger({
   roomId,
   participants,
-}: InviteAndShareTriggerProps) {
+}: RoomAccessControlTriggerProps) {
   return (
     <Popover>
-      <PopoverTrigger>
-        <Users className="w-4 h-4 text-mute" />
+      <PopoverTrigger asChild>
+        <Button className="flex items-center gap-2" variant="outline">
+          <Users className="w-4 h-4 text-mute" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent className="w-fit">
         <InviteAndShareCard roomId={roomId} participants={participants} />

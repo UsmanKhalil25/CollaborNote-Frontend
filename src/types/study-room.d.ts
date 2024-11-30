@@ -1,20 +1,29 @@
 import { ParticipantOut, Participant } from "@/types/participant";
 
-export interface IStudyRoomListingOut {
+// Base Interface for Common Room Properties
+interface BaseStudyRoom {
   id: string;
   name: string;
   description: string;
+  participants: Participant[] | ParticipantOut[];
   createdAt: string;
+}
+
+export interface IStudyRoomListing
+  extends Omit<
+    BaseStudyRoom,
+    "participants" | "content" | "isActive" | "endedAt"
+  > {
   participants: ParticipantOut[];
 }
 
-export interface StudyRoom {
-  id?: string;
-  name: string;
-  description: string;
-  participants: Participant[];
+export interface IStudyRoomDetail extends BaseStudyRoom {
   content: string;
   isActive: boolean;
-  createdAt: Date;
   endedAt?: Date;
+  participants: ParticipantOut[];
+}
+
+export interface StudyRoom extends IStudyRoomDetail {
+  participants: Participant[];
 }

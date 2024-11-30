@@ -10,21 +10,37 @@ import { api } from "@/api";
 import { QUERY } from "@/constants";
 import { IInvitationSearchItem } from "@/types/invitation";
 import { ENDPOINTS } from "@/config/api-config";
+import { convertCamelCaseToSnakeCase } from "@/lib/utils";
+
+interface IInvitePayload {
+  studyRoomId: string;
+  invitedUserId: string;
+}
 
 interface InviteUserItemProps {
   user: IInvitationSearchItem;
+  roomId: string;
   searchQuery: string;
 }
 
-export function InviteUserItem({ user, searchQuery }: InviteUserItemProps) {
+export function InviteUserItem({
+  user,
+  searchQuery,
+  roomId,
+}: InviteUserItemProps) {
   const queryClient = useQueryClient();
+
   const { mutate: sendFriendRequest, isPending } = useMutation({
-    mutationFn: async (userId: string) => {
-      await api.post<Response<null>>(ENDPOINTS.friendRequests.send(userId));
+    mutationFn: async (data: IInvitePayload) => {
+      const transformedData = convertCamelCaseToSnakeCase(data);
+      await api.post<Response<null>>(
+        ENDPOINTS.invitations.index,
+        transformedData
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY.USERS, searchQuery],
+        queryKey: [QUERY.INVITATIONS, searchQuery],
       });
     },
 
@@ -34,7 +50,8 @@ export function InviteUserItem({ user, searchQuery }: InviteUserItemProps) {
 
   const handleSendRequest = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    sendFriendRequest(user.id);
+    const data = { studyRoomId: roomId, invitedUserId: user.id };
+    sendFriendRequest(data);
   };
 
   return (
@@ -48,13 +65,13 @@ export function InviteUserItem({ user, searchQuery }: InviteUserItemProps) {
 
       <div>
         {user.isParticipant ? (
-          <TooltipContainer label="Already your friend">
+          <TooltipContainer label="Already a participant">
             <Button variant="link">
               <Users className="w-5 h-5" />
             </Button>
           </TooltipContainer>
         ) : user.inviteSent ? (
-          <TooltipContainer label="Friend request is pending">
+          <TooltipContainer label="Invitation is pending">
             <Button variant="link">
               <UserCheck className="w-5 h-5" />
             </Button>

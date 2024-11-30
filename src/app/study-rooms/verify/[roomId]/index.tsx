@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { StudyRoom } from "@/types/study-room";
+import { IStudyRoomDetail } from "@/types/study-room";
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config";
-import { convertToCamelCase } from "@/lib/utils";
+import { convertSnakeCaseToCamelCase } from "@/lib/utils";
 import { AuthContext } from "@/auth/auth-context.ts";
 
 export default function StudyRoomVerifyPage() {
@@ -12,7 +12,7 @@ export default function StudyRoomVerifyPage() {
   const { roomId } = useParams();
   const auth = useContext(AuthContext);
 
-  const [roomData, setRoomData] = useState<StudyRoom | null>(null);
+  const [roomData, setRoomData] = useState<IStudyRoomDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
@@ -25,11 +25,11 @@ export default function StudyRoomVerifyPage() {
     const fetchStudyRoom = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get<Response<{ study_room: StudyRoom }>>(
-          ENDPOINTS.studyRooms.id(roomId)
-        );
+        const response = await api.get<
+          Response<{ study_room: IStudyRoomDetail }>
+        >(ENDPOINTS.studyRooms.id(roomId));
         const data = response.data.data.study_room;
-        setRoomData(convertToCamelCase(data));
+        setRoomData(convertSnakeCaseToCamelCase(data));
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch study room:", error);

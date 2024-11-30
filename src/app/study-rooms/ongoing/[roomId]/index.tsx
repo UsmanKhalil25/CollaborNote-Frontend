@@ -7,10 +7,10 @@ import {
 } from "@excalidraw/excalidraw/types/types";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 
+import { IStudyRoomDetail } from "@/types/study-room";
 import ExcalidrawMainMenu from "@/components/ExcalidrawMainMenu";
-import { SendInviteDialog } from "@/components/SendInviteDialog";
-import { InviteAndShareTrigger } from "@/components/InviteAndShareTrigger";
 import { AuthContext } from "@/auth/auth-context";
+import { RoomTopLeftUI } from "@/components/RoomTopLeftUI";
 
 interface IStudyRoomSocketResponse {
   type: string;
@@ -32,18 +32,18 @@ export default function StudyRoomOngoingPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
-
-  const roomData = location.state?.roomData;
-
-  if (!roomData) {
-    navigate("/not-found");
-    return null;
-  }
-
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
-
   const websocketRef = useRef<WebSocket | null>(null);
+
+  const room: IStudyRoomDetail = location.state?.roomData;
+
+  useEffect(() => {
+    if (!room) {
+      navigate("/not-found");
+    }
+  }, [room, navigate]);
+
   useEffect(() => {
     if (!auth?.user?._id) return;
 
@@ -75,6 +75,8 @@ export default function StudyRoomOngoingPage() {
 
   const handleReceivedData = (data: IStudyRoomSocketResponse) => {
     try {
+      if (data.data.editorId === auth?.user?._id) return;
+
       const parsedElements = JSON.parse(
         data.data.content
       ) as ExcalidrawElement[];
@@ -107,13 +109,15 @@ export default function StudyRoomOngoingPage() {
       const obj = {
         type: "document_update",
         data: {
-          study_room_id: roomData.id,
+          study_room_id: room.id,
           content: JSON.stringify(data),
         },
       };
       sendMessage(obj);
     }, 300);
   };
+
+  if (!room) return null;
 
   return (
     <div className="h-screen relative">
@@ -123,15 +127,7 @@ export default function StudyRoomOngoingPage() {
         isCollaborating={true}
         onChange={handleChange}
         excalidrawAPI={(api) => setExcalidrawAPI(api)}
-        renderTopRightUI={() => (
-          <div className="flex items-center gap-4">
-            <InviteAndShareTrigger
-              roomId={roomData.id}
-              participants={roomData?.participants}
-            />
-            <SendInviteDialog roomId={roomData.id} />
-          </div>
-        )}
+        renderTopRightUI={() => <RoomTopLeftUI room={room} />}
       >
         <ExcalidrawMainMenu />
       </Excalidraw>

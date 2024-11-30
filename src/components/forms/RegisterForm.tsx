@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input.tsx";
 
 import AuthCard from "@/components/AuthCard.tsx";
 
-import { camelToSnakeCase } from "@/lib/utils.ts";
+import { convertCamelCaseToSnakeCase } from "@/lib/utils.ts";
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { Loader2 } from "lucide-react";
 import { api } from "@/api";
@@ -52,7 +52,7 @@ export default function RegisterForm() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: RegisterFormValues) => {
-      const transformedData = camelToSnakeCase(data);
+      const transformedData = convertCamelCaseToSnakeCase(data);
       const response = await api.post<Response<null>>(
         ENDPOINTS.auth.register,
         transformedData

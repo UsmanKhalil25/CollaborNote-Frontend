@@ -1,4 +1,4 @@
-import { IStudyRoomListingOut } from "@/types/study-room";
+import { IStudyRoomListing } from "@/types/study-room";
 import { IUserInfo } from "@/types/user";
 
 export enum InvitationStatus {
@@ -16,7 +16,7 @@ export interface IInvitationListingOut {
   createdAt: string;
   respondedAt?: string | null;
   inviterUserInfo: IUserInfo;
-  studyRoomInfo: IStudyRoomListingOut;
+  studyRoomInfo: IStudyRoomListing;
 }
 
 export interface IInvitationSearchItem {

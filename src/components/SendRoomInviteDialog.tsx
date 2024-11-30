@@ -19,24 +19,24 @@ import { ENDPOINTS } from "@/config/api-config";
 import { api } from "@/api";
 import { IInvitationSearchItem } from "@/types/invitation";
 import InviteUserList from "./InviteUserList";
-import { convertToCamelCase } from "@/lib/utils";
+import { convertSnakeCaseToCamelCase } from "@/lib/utils";
 
-interface SendInviteDialogProps {
+interface SendRoomInviteDialogProps {
   roomId: string;
 }
 
-export function SendInviteDialog({ roomId }: SendInviteDialogProps) {
+export function SendRoomInviteDialog({ roomId }: SendRoomInviteDialogProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   const { data: fetchedUsers, isLoading } = useQuery({
-    queryKey: [QUERY.STUDY_ROOMS, debouncedQuery],
+    queryKey: [QUERY.INVITATIONS, debouncedQuery],
     queryFn: async () => {
       const response = await api.get<
         Response<{ users: IInvitationSearchItem[] }>
       >(ENDPOINTS.studyRooms.search(roomId, debouncedQuery));
       const data = response.data.data.users;
-      return convertToCamelCase(data);
+      return convertSnakeCaseToCamelCase(data);
     },
     enabled: !!debouncedQuery,
   });
@@ -45,7 +45,6 @@ export function SendInviteDialog({ roomId }: SendInviteDialogProps) {
     <Dialog>
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2" variant="outline">
-          Send Invite
           <UserPlus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -69,6 +68,7 @@ export function SendInviteDialog({ roomId }: SendInviteDialogProps) {
         <div className="h-72 flex justify-center items-start">
           <InviteUserList
             users={fetchedUsers}
+            roomId={roomId}
             isLoading={isLoading}
             searchQuery={searchQuery}
           />

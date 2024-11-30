@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 
-import { IStudyRoomListingOut } from "@/types/study-room";
+import { IStudyRoomListing } from "@/types/study-room";
 import { timeAgo } from "@/lib/utils";
 
 interface StudyRoomItemProps {
-  studyRoom: IStudyRoomListingOut;
+  studyRoom: IStudyRoomListing;
 }
 
 export function StudyRoomItem({ studyRoom }: StudyRoomItemProps) {

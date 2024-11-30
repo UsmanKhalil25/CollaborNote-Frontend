@@ -6,20 +6,20 @@ import { StudyRoomItemSkeleton } from "@/components/StudyRoomItemSkeleton";
 import { InvitationItem } from "@/components/InvitationItem";
 import { CreateStudyRoomDialog } from "@/components/CreateStudyRoomDialog";
 
-import { IStudyRoomListingOut } from "@/types/study-room";
+import { IStudyRoomListing } from "@/types/study-room";
 import { IInvitationListingOut } from "@/types/invitation";
 import { QUERY } from "@/constants";
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config";
-import { convertToCamelCase } from "@/lib/utils";
+import { convertSnakeCaseToCamelCase } from "@/lib/utils";
 
 export default function StudyRoomsPage() {
   const studyRoomQueryFn = async () => {
     const response = await api.get<
-      Response<{ study_rooms: IStudyRoomListingOut[] }>
+      Response<{ study_rooms: IStudyRoomListing[] }>
     >(ENDPOINTS.studyRooms.index);
     const data = response.data.data.study_rooms;
-    return convertToCamelCase(data);
+    return convertSnakeCaseToCamelCase(data);
   };
 
   const invitationQueryFn = async () => {
@@ -27,7 +27,7 @@ export default function StudyRoomsPage() {
       Response<{ invitations: IInvitationListingOut[] }>
     >(ENDPOINTS.invitations.index);
     const data = response.data.data.invitations;
-    const camelCaseData = convertToCamelCase(data);
+    const camelCaseData = convertSnakeCaseToCamelCase(data);
     return camelCaseData;
   };
 
@@ -38,13 +38,13 @@ export default function StudyRoomsPage() {
         <CreateStudyRoomDialog />
       </div>
       <div className="h-[85%] grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <ListCard<IStudyRoomListingOut>
+        <ListCard<IStudyRoomListing>
           className="col-span-4"
           title="Study Rooms"
           description="You are currently enrolled in 20 active study rooms."
           queryKey={[QUERY.STUDY_ROOMS]}
           queryFn={studyRoomQueryFn}
-          listItem={(studyRoom: IStudyRoomListingOut) => (
+          listItem={(studyRoom: IStudyRoomListing) => (
             <StudyRoomItem key={studyRoom.id} studyRoom={studyRoom} />
           )}
           skeleton={<StudyRoomItemSkeleton />}
