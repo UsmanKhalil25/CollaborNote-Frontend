@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 
-import TooltipContainer from "@/components/TooltipContainer";
+import { TooltipContainer } from "@/components/TooltipContainer";
 import UserInfo from "@/components/UserInfo";
 
 import { api } from "@/api";

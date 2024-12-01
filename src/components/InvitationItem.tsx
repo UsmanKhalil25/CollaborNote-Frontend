@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import TooltipContainer from "@/components/TooltipContainer";
+import { TooltipContainer } from "@/components/TooltipContainer";
 
 import { api } from "@/api";
 import { IInvitationListingOut } from "@/types/invitation";
@@ -74,7 +74,7 @@ export function InvitationItem({ invitation }: InvitationItemProps) {
           <div className="font-semibold">{invitation.studyRoomInfo.name}</div>
           <div className="flex gap-3 overflow-x-auto">
             {invitation.studyRoomInfo.participants.map((participant) => (
-              <Badge>{participant.firstName}</Badge>
+              <Badge key={participant.userId}>{participant.firstName}</Badge>
             ))}
           </div>
         </div>

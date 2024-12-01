@@ -11,10 +11,7 @@ interface TooltipContainerProps {
   children: ReactNode;
   label: string;
 }
-export default function TooltipContainer({
-  children,
-  label,
-}: TooltipContainerProps) {
+export function TooltipContainer({ children, label }: TooltipContainerProps) {
   return (
     <TooltipProvider>
       <Tooltip>

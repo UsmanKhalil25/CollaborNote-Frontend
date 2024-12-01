@@ -10,7 +10,7 @@ import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { FriendRequest } from "@/types/friend-request";
 import { QUERY } from "@/constants";
-import TooltipContainer from "./TooltipContainer";
+import { TooltipContainer } from "@/components/TooltipContainer";
 import { timeAgo } from "@/lib/utils";
 
 interface FriendRequestItemProps {

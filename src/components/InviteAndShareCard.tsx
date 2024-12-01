@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
-import TooltipContainer from "@/components/TooltipContainer";
+import { TooltipContainer } from "@/components/TooltipContainer";
 
 import { ParticipantOut } from "@/types/participant";
 import { getUserInitials } from "@/lib/utils";

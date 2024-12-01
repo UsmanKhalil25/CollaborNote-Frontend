@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-import useDebounce from "@/hooks/use-debounce";
+import { useDebounce } from "@/hooks/use-debounce";
 import { QUERY } from "@/constants";
 import { ENDPOINTS } from "@/config/api-config";
 import { api } from "@/api";

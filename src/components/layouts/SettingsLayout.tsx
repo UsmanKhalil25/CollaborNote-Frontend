@@ -4,7 +4,7 @@ import { Home } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import TooltipContainer from "../TooltipContainer";
+import { TooltipContainer } from "@/components/TooltipContainer";
 
 const sidebarNavItems = [
   {

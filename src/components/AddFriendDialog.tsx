@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 
 import UserList from "@/components/UserList";
 
-import useDebounce from "@/hooks/use-debounce";
+import { useDebounce } from "@/hooks/use-debounce";
 import { QUERY } from "@/constants";
 import { ENDPOINTS } from "@/config/api-config";
 import { api } from "@/api";

@@ -54,6 +54,12 @@ export default function StudyRoomVerifyPage() {
     }
   }, [roomData, auth, navigate, roomId]);
 
+  useEffect(() => {
+    if (isError) {
+      navigate("/study-rooms/not-found");
+    }
+  }, [isError, navigate]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center text-center h-screen bg-black">
@@ -65,10 +71,6 @@ export default function StudyRoomVerifyPage() {
         </p>
       </div>
     );
-  }
-
-  if (isError) {
-    navigate("/study-rooms/not-found");
   }
 
   return null;
