@@ -47,14 +47,16 @@ export function InvitationItem({ invitation }: InvitationItemProps) {
       await api.patch(
         ENDPOINTS.invitations.updateStatus(invitation_id, newStatus)
       );
+      return newStatus;
     },
-    onSuccess: () => {
+    onSuccess: (newStatus) => {
+      if (newStatus === "accepted") {
+        addParticipantMutation();
+      }
       queryClient.invalidateQueries({
         queryKey: [QUERY.INVITATIONS],
       });
-      addParticipantMutation();
     },
-
     onError: (error) =>
       console.error("Error updating invitation status:", error),
   });

@@ -1,3 +1,5 @@
+import { useContext, useEffect } from "react";
+
 import { TypographyH2 } from "@/components/ui/typography-h2";
 
 import { ListCard } from "@/components/ListCard";
@@ -12,8 +14,36 @@ import { QUERY } from "@/constants";
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config";
 import { convertSnakeCaseToCamelCase } from "@/lib/utils";
+import { AuthContext } from "@/auth/auth-context";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function StudyRoomsPage() {
+  const authContext = useContext(AuthContext);
+  const queryClient = useQueryClient();
+
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider.");
+  }
+  const { messages } = authContext;
+
+  useEffect(() => {
+    if (messages) {
+      messages.forEach((message) => {
+        try {
+          const parsedMessage = JSON.parse(message);
+          if (parsedMessage.type === "invitation") {
+            console.log("Invitation received:", parsedMessage);
+            queryClient.invalidateQueries({
+              queryKey: [QUERY.INVITATIONS],
+            });
+          }
+        } catch (error) {
+          console.error("Failed to parse message:", message, error);
+        }
+      });
+    }
+  }, [messages]);
+
   const studyRoomQueryFn = async () => {
     const response = await api.get<
       Response<{ study_rooms: IStudyRoomListing[] }>

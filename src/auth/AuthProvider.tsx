@@ -1,9 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useLayoutEffect } from "react";
+
 import { AuthContext } from "@/auth/auth-context.ts";
 import { User } from "@/types/user";
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config.ts";
-import { useQuery } from "@tanstack/react-query";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -21,6 +22,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const storedToken = sessionStorage.getItem("auth_token");
   const [token, setToken] = useState<string | null>(storedToken);
   const [user, setUser] = useState<User | null>(null);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [messages, setMessages] = useState<string[]>([]);
 
   const { data, refetch } = useQuery<User | null>({
     queryKey: ["user", token],
@@ -45,10 +48,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     if (token) {
       sessionStorage.setItem("auth_token", token);
+
+      const ws = new WebSocket(`ws://localhost:8000/api/ws?token=${token}`);
+
+      setSocket(ws);
+
+      ws.onmessage = (event) => {
+        const message = event.data;
+        console.log("Received message:", message);
+        setMessages((prevMessages) => [...prevMessages, message]);
+      };
+
+      ws.onopen = () => {
+        console.log("WebSocket connection established.");
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket connection closed.");
+      };
+
+      return () => {
+        ws.close();
+      };
     } else {
       sessionStorage.removeItem("auth_token");
+      if (socket) {
+        socket.close();
+      }
     }
   }, [token]);
+
+  const sendMessage = (message: string) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(message);
+    } else {
+      console.error("WebSocket is not open.");
+    }
+  };
 
   useLayoutEffect(() => {
     const requestInterceptor = api.interceptors.request.use(
@@ -105,7 +145,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [refetch]);
 
   return (
-    <AuthContext.Provider value={{ token, user, setToken, setUser }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        socket,
+        setToken,
+        setUser,
+        setSocket,
+        sendMessage,
+        messages,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

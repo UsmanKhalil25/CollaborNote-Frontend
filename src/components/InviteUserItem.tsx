@@ -1,8 +1,8 @@
 import { UserCheck, UserPlus, Users } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useContext } from "react";
 
 import { Button } from "@/components/ui/button";
-
 import { TooltipContainer } from "@/components/TooltipContainer";
 import UserInfo from "@/components/UserInfo";
 
@@ -11,6 +11,7 @@ import { QUERY } from "@/constants";
 import { IInvitationSearchItem } from "@/types/invitation";
 import { ENDPOINTS } from "@/config/api-config";
 import { convertCamelCaseToSnakeCase } from "@/lib/utils";
+import { AuthContext } from "@/auth/auth-context";
 
 interface IInvitePayload {
   studyRoomId: string;
@@ -29,6 +30,13 @@ export function InviteUserItem({
   roomId,
 }: InviteUserItemProps) {
   const queryClient = useQueryClient();
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider.");
+  }
+
+  const { socket } = authContext;
 
   const { mutate: sendFriendRequest, isPending } = useMutation({
     mutationFn: async (data: IInvitePayload) => {
@@ -37,13 +45,21 @@ export function InviteUserItem({
         ENDPOINTS.invitations.index,
         transformedData
       );
+
+      if (socket) {
+        const message = JSON.stringify({
+          type: "invitation",
+          to: data.invitedUserId,
+          message: `You have been invited to study room ${data.studyRoomId}`,
+        });
+        socket.send(message);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY.INVITATIONS, searchQuery],
       });
     },
-
     onError: (error) =>
       console.error("Error updating friend request status:", error),
   });
