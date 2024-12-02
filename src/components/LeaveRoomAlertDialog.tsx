@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -25,17 +25,31 @@ import { AuthContext } from "@/auth/auth-context";
 interface LeaveRoomAlertDialogProps {
   isOwner: boolean;
   roomId: string;
+  onRoomEnd: () => void;
+  roomEnded: boolean;
 }
 
 export function LeaveRoomAlertDialog({
   isOwner,
   roomId,
+  onRoomEnd,
+  roomEnded,
 }: LeaveRoomAlertDialogProps) {
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (roomEnded) {
+      leaveRoomMutation();
+      toast({
+        description: "The owner ended the room.",
+        variant: "destructive",
+      });
+    }
+  }, [roomEnded]);
   const removeOwnerMutationFn = async () => {
+    onRoomEnd();
     const response = await api.patch<Response<null>>(
       ENDPOINTS.studyRooms.end(roomId)
     );
@@ -52,7 +66,10 @@ export function LeaveRoomAlertDialog({
   const { mutate: leaveRoomMutation, isPending } = useMutation({
     mutationFn: isOwner ? removeOwnerMutationFn : removeParticipantMutationFn,
     onSuccess: () => {
-      toast({ description: "Left the room successfully" });
+      toast({
+        description: `${roomEnded ? "The owner ended the room" : "Left the room successfully"}`,
+        variant: `${roomEnded ? "destructive" : "default"}`,
+      });
       navigate("/");
     },
     onError: (error: AxiosError<Error>) => {

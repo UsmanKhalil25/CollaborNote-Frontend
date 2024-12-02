@@ -55,7 +55,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       ws.onmessage = (event) => {
         const message = event.data;
-        console.log("Received message:", message);
         setMessages((prevMessages) => [...prevMessages, message]);
       };
 

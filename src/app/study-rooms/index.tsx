@@ -1,4 +1,5 @@
 import { useContext, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { TypographyH2 } from "@/components/ui/typography-h2";
 
@@ -10,12 +11,11 @@ import { CreateStudyRoomDialog } from "@/components/CreateStudyRoomDialog";
 
 import { IStudyRoomListing } from "@/types/study-room";
 import { IInvitationListingOut } from "@/types/invitation";
-import { QUERY } from "@/constants";
+import { QUERY, SOCKET_MESSAGES } from "@/constants";
 import { api } from "@/api";
 import { ENDPOINTS } from "@/config/api-config";
 import { convertSnakeCaseToCamelCase } from "@/lib/utils";
 import { AuthContext } from "@/auth/auth-context";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function StudyRoomsPage() {
   const authContext = useContext(AuthContext);
@@ -31,8 +31,7 @@ export default function StudyRoomsPage() {
       messages.forEach((message) => {
         try {
           const parsedMessage = JSON.parse(message);
-          if (parsedMessage.type === "invitation") {
-            console.log("Invitation received:", parsedMessage);
+          if (parsedMessage.type === SOCKET_MESSAGES.INVITATION) {
             queryClient.invalidateQueries({
               queryKey: [QUERY.INVITATIONS],
             });

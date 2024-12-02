@@ -9,8 +9,14 @@ import { isUserRoomOwner } from "@/lib/utils";
 
 interface RoomTopLeftUIProps {
   room: IStudyRoomDetail;
+  onRoomEnd: () => void;
+  roomEnded: boolean;
 }
-export function RoomTopLeftUI({ room }: RoomTopLeftUIProps) {
+export function RoomTopLeftUI({
+  room,
+  onRoomEnd,
+  roomEnded,
+}: RoomTopLeftUIProps) {
   const auth = useContext(AuthContext);
   return (
     <div className="flex items-center gap-4">
@@ -22,6 +28,8 @@ export function RoomTopLeftUI({ room }: RoomTopLeftUIProps) {
       <LeaveRoomAlertDialog
         isOwner={isUserRoomOwner(auth?.user?._id, room.participants)}
         roomId={room.id}
+        onRoomEnd={onRoomEnd}
+        roomEnded={roomEnded}
       />
     </div>
   );

@@ -11,14 +11,11 @@ import { IStudyRoomDetail } from "@/types/study-room";
 import ExcalidrawMainMenu from "@/components/ExcalidrawMainMenu";
 import { AuthContext } from "@/auth/auth-context";
 import { RoomTopLeftUI } from "@/components/RoomTopLeftUI";
+import { SOCKET_MESSAGES } from "@/constants";
 
-interface IStudyRoomSocketResponse {
+interface ISocketResponse {
   type: string;
-  data: {
-    content: ExcalidrawElement[];
-    editorId: string;
-    studyRoomId: string;
-  };
+  data: any;
 }
 
 const INITIAL_BACKGROUND_COLOR: string = "#f8f9fa";
@@ -36,6 +33,7 @@ export default function StudyRoomOngoingPage() {
     useState<ExcalidrawImperativeAPI | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
   const lastSentDataRef = useRef<ExcalidrawElement[]>([]);
+  const [roomEnded, setRoomEnded] = useState(false);
 
   const room: IStudyRoomDetail = location.state?.roomData;
 
@@ -62,6 +60,7 @@ export default function StudyRoomOngoingPage() {
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log("data: ", data);
         handleReceivedData(data);
       };
 
@@ -82,8 +81,8 @@ export default function StudyRoomOngoingPage() {
     };
   }, [auth?.user?._id, room?.id]);
 
-  const handleReceivedData = (data: IStudyRoomSocketResponse) => {
-    try {
+  const handleReceivedData = (data: ISocketResponse) => {
+    if (data.type === SOCKET_MESSAGES.DOCUMENT_UPDATE) {
       if (data.data.editorId === auth?.user?._id) {
         console.log("Same data, skipping update");
         return;
@@ -98,8 +97,8 @@ export default function StudyRoomOngoingPage() {
         });
         lastSentDataRef.current = data.data.content;
       }
-    } catch (error) {
-      console.error("Error parsing received data", error);
+    } else if (data.type === SOCKET_MESSAGES.ROOM_END) {
+      setRoomEnded(true);
     }
   };
 
@@ -110,8 +109,11 @@ export default function StudyRoomOngoingPage() {
       websocketRef.current &&
       websocketRef.current.readyState === WebSocket.OPEN
     ) {
+      if (message.type === SOCKET_MESSAGES.DOCUMENT_UPDATE) {
+        lastSentDataRef.current = message.data.content;
+      }
+      console.log(JSON.stringify(message));
       websocketRef.current.send(JSON.stringify(message));
-      lastSentDataRef.current = message.data.content;
     } else {
       console.warn("WebSocket is not open. Message not sent.");
     }
@@ -123,15 +125,25 @@ export default function StudyRoomOngoingPage() {
     }
 
     debounceTimeoutRef.current = window.setTimeout(() => {
-      const obj = {
-        type: "document_update",
+      const documentUpdateMessage = {
+        type: SOCKET_MESSAGES.DOCUMENT_UPDATE,
         data: {
           study_room_id: room.id,
           content: data,
         },
       };
-      sendMessage(obj);
+      sendMessage(documentUpdateMessage);
     }, 300);
+  };
+
+  const handleRoomEnd = () => {
+    const roomEndMessage = {
+      type: SOCKET_MESSAGES.ROOM_END,
+      data: {
+        study_room_id: room.id,
+      },
+    };
+    sendMessage(roomEndMessage);
   };
 
   if (!room) return null;
@@ -144,7 +156,13 @@ export default function StudyRoomOngoingPage() {
         isCollaborating={true}
         onChange={handleChange}
         excalidrawAPI={(api) => setExcalidrawAPI(api)}
-        renderTopRightUI={() => <RoomTopLeftUI room={room} />}
+        renderTopRightUI={() => (
+          <RoomTopLeftUI
+            room={room}
+            onRoomEnd={handleRoomEnd}
+            roomEnded={roomEnded}
+          />
+        )}
       >
         <ExcalidrawMainMenu />
       </Excalidraw>
