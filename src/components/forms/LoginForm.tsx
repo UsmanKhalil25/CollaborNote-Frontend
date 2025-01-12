@@ -51,7 +51,7 @@ export default function LoginForm() {
     defaultValues,
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate:loginUser, isPending } = useMutation({
     mutationFn: async (data: LoginFormValues) => {
       const response = await api.post<Response<LoginData>>(
         ENDPOINTS.auth.login,
@@ -78,7 +78,7 @@ export default function LoginForm() {
   });
 
   const onSubmit = (data: LoginFormValues) => {
-    mutate(data);
+    loginUser(data);
   };
 
   return (

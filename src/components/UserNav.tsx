@@ -30,6 +30,7 @@ export default function UserNav() {
 
   const handleLogout = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    // TODO: blacklist the current token
     auth?.setUser(null);
     auth?.setToken(null);
   };
