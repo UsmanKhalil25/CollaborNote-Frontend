@@ -48,11 +48,12 @@ export default function LoginForm() {
         ENDPOINTS.auth.login,
         data
       );
-      return response.data.data.access_token;
+      return response.data;
     },
-    onSuccess: (accessToken) => {
-      setToken(accessToken);
-      toast({ description: "Login successful" });
+    onSuccess: (response: Response<{ access_token: string }>) => {
+      const token = response.data.access_token;
+      setToken(token);
+      toast({ title: response.message, description: "Welcome back!" });
       navigate("/", { replace: true });
     },
     onError: (error: AxiosError<ErrorResponse>) => {

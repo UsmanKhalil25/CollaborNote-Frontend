@@ -1,4 +1,7 @@
+import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getUserInitials } from "@/lib/utils.ts";
+
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+
+import { getUserInitials } from "@/lib/utils.ts";
+import { ENDPOINTS } from "@/config/api-config";
+import { Response, ErrorResponse } from "@/types/api";
+import { api } from "@/api";
 
 const NAV_ITEMS = [
   { label: "Profile", path: "/profile" },
@@ -20,16 +29,39 @@ const NAV_ITEMS = [
 ];
 
 export default function UserNav() {
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user, setToken, setUser } = useAuth();
+  const { toast } = useToast();
 
   const handleNavigation = (path: string) => {
     navigate(path);
   };
 
-  const handleLogout = (e: React.MouseEvent<HTMLDivElement>) => {
+  const { mutate: blacklistToken, isPending } = useMutation({
+    mutationFn: async () => {
+      const response = await api.post<Response<null>>(ENDPOINTS.auth.logout);
+      return response.data;
+    },
+    onSuccess: (response: Response<null>) => {
+      setUser(null);
+      setToken(null);
+      toast({ title: response.message, description: "Come back soon" });
+      navigate("/", { replace: true });
+    },
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const responseError = error.response?.data;
+
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: responseError?.message || "An unexpected error occurred",
+      });
+    },
+  });
+
+  const handleLogout = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    // TODO: blacklist the current token
+    blacklistToken();
   };
 
   return (
@@ -67,7 +99,13 @@ export default function UserNav() {
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout} disabled={isPending}>
+          {isPending ? (
+            <span className="animate-pulse">Logging out...</span>
+          ) : (
+            "Logout"
+          )}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
