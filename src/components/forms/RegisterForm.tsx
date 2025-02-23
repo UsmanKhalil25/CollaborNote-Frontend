@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
 
 import {
   Form,
@@ -12,34 +14,23 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-
 import { useToast } from "@/hooks/use-toast.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
-
 import AuthCard from "@/components/AuthCard.tsx";
-
-import { convertCamelCaseToSnakeCase } from "@/lib/utils.ts";
 import { ENDPOINTS } from "@/config/api-config.ts";
-import { Loader2 } from "lucide-react";
 import { api } from "@/api";
-import { AxiosError } from "axios";
+import { convertCamelCaseToSnakeCase } from "@/lib/utils.ts";
+import { Response, ErrorResponse } from "@/types/api";
 
 const registerSchema = z.object({
-  firstName: z.string().min(1, { message: "First name is required" }),
-  lastName: z.string().min(1, { message: "Last name is required" }),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
-
-const defaultValues: Partial<RegisterFormValues> = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-};
 
 export default function RegisterForm() {
   const { toast } = useToast();
@@ -47,10 +38,15 @@ export default function RegisterForm() {
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues,
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate: registerUser, isPending } = useMutation({
     mutationFn: async (data: RegisterFormValues) => {
       const transformedData = convertCamelCaseToSnakeCase(data);
       const response = await api.post<Response<null>>(
@@ -59,49 +55,56 @@ export default function RegisterForm() {
       );
       return response.data.message;
     },
-    onSuccess: (message: string) => {
+    onSuccess: (message) => {
       toast({ description: message });
-      navigate("/login");
+      navigate("/login", { replace: true });
     },
-    onError: (error: AxiosError<Error>) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const responseError = error.response?.data;
+
       toast({
         variant: "destructive",
-        description: error.response?.data.message,
+        title: "Registration failed",
+        description: responseError?.message || "An unexpected error occurred",
       });
     },
   });
 
   const onSubmit = (data: RegisterFormValues) => {
-    mutate(data);
+    registerUser(data);
   };
 
   return (
     <AuthCard
-      title="Sign Up"
-      description="Enter your information to create an account"
+      title="Create Account"
+      description="Enter your information to get started"
       alternativeMessage="Already have an account?"
       linkText="Sign in"
       linkHref="/login"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid gap-4"
+          aria-label="Registration form"
+        >
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="firstName">First name</FormLabel>
+                  <FormLabel>First name</FormLabel>
                   <FormControl>
                     <Input
-                      id="firstName"
-                      type="text"
-                      placeholder="Max"
-                      required
                       {...field}
+                      placeholder="Max"
+                      autoComplete="given-name"
+                      disabled={isPending}
+                      aria-describedby="firstName-error"
                     />
                   </FormControl>
-                  <FormMessage className="text-red-600" />
+                  <FormMessage id="firstName-error" className="text-red-600" />
                 </FormItem>
               )}
             />
@@ -110,17 +113,17 @@ export default function RegisterForm() {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="lastName">Last name</FormLabel>
+                  <FormLabel>Last name</FormLabel>
                   <FormControl>
                     <Input
-                      id="lastName"
-                      type="text"
-                      placeholder="Robinson"
-                      required
                       {...field}
+                      placeholder="Robinson"
+                      autoComplete="family-name"
+                      disabled={isPending}
+                      aria-describedby="lastName-error"
                     />
                   </FormControl>
-                  <FormMessage className="text-red-600" />
+                  <FormMessage id="lastName-error" className="text-red-600" />
                 </FormItem>
               )}
             />
@@ -131,17 +134,18 @@ export default function RegisterForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="email">Email</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    id="email"
+                    {...field}
                     type="email"
                     placeholder="m@example.com"
-                    required
-                    {...field}
+                    autoComplete="email"
+                    disabled={isPending}
+                    aria-describedby="email-error"
                   />
                 </FormControl>
-                <FormMessage className="text-red-600" />
+                <FormMessage id="email-error" className="text-red-600" />
               </FormItem>
             )}
           />
@@ -151,19 +155,38 @@ export default function RegisterForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center">
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                </div>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input id="password" type="password" required {...field} />
+                  <Input
+                    {...field}
+                    type="password"
+                    autoComplete="new-password"
+                    disabled={isPending}
+                    aria-describedby="password-error"
+                  />
                 </FormControl>
-                <FormMessage className="text-red-600" />
+                <p className="text-muted-foreground text-sm mt-1">
+                  Minimum 6 characters
+                </p>
+                <FormMessage id="password-error" className="text-red-600" />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending && <Loader2 className="animate-spin mr-4" />}
-            {isPending ? "Signing up..." : "Sign up"}
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isPending}
+            aria-live="polite"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating account...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </Button>
         </form>
       </Form>

@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AuthContext } from "@/auth/auth-context.ts";
 import { getUserInitials } from "@/lib/utils.ts";
+import { useAuth } from "@/hooks/use-auth";
 
 const NAV_ITEMS = [
   { label: "Profile", path: "/profile" },
@@ -21,8 +20,8 @@ const NAV_ITEMS = [
 ];
 
 export default function UserNav() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const auth = useContext(AuthContext);
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -31,8 +30,6 @@ export default function UserNav() {
   const handleLogout = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     // TODO: blacklist the current token
-    auth?.setUser(null);
-    auth?.setToken(null);
   };
 
   return (
@@ -42,7 +39,7 @@ export default function UserNav() {
           <Avatar>
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>
-              {getUserInitials(auth?.user?.first_name, auth?.user?.last_name)}
+              {getUserInitials(user?.first_name, user?.last_name)}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -51,10 +48,10 @@ export default function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {auth?.user?.first_name}
+              {user?.first_name}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {auth?.user?.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>

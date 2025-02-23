@@ -1,9 +1,19 @@
-interface Response<T> {
+export interface Response<T> {
   data: T;
   message: string;
   status: string;
 }
 
-interface Error {
+export interface ErrorResponse {
+  message: string;
+  error?: {
+    details?: Array<{
+      path: string;
+      message: string;
+    }>;
+  };
+}
+
+export interface Error {
   message: string;
 }

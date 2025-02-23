@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 import {
   Form,
@@ -13,66 +13,55 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-
 import { useToast } from "@/hooks/use-toast.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
-
 import AuthCard from "@/components/AuthCard.tsx";
-
-import { AuthContext } from "@/auth/auth-context.ts";
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { api } from "@/api";
-import { AxiosError } from "axios";
+import { useAuth } from "@/hooks/use-auth";
+import { Response, ErrorResponse } from "@/types/api";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const defaultValues: Partial<LoginFormValues> = {
-  email: "",
-  password: "",
-};
-
-interface LoginData {
-  access_token: string;
-}
-
 export default function LoginForm() {
   const { toast } = useToast();
+  const { setToken } = useAuth();
   const navigate = useNavigate();
-  const auth = useContext(AuthContext);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues,
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const { mutate:loginUser, isPending } = useMutation({
+  const { mutate: loginUser, isPending } = useMutation({
     mutationFn: async (data: LoginFormValues) => {
-      const response = await api.post<Response<LoginData>>(
+      const response = await api.post<Response<{ access_token: string }>>(
         ENDPOINTS.auth.login,
         data
       );
       return response.data.data.access_token;
     },
-    onSuccess: (accessToken: string) => {
-      auth?.setToken(accessToken);
-
-      toast({
-        description: "Login successful",
-      });
-      navigate("/");
+    onSuccess: (accessToken) => {
+      setToken(accessToken);
+      toast({ description: "Login successful" });
+      navigate("/", { replace: true });
     },
-    onError: (error: AxiosError<Error>) => {
-      const errorMessage = error.response?.data.message || error.message;
+    onError: (error: AxiosError<ErrorResponse>) => {
+      const responseError = error.response?.data;
 
       toast({
         variant: "destructive",
-        description: errorMessage,
+        title: "Login failed",
+        description: responseError?.message || "An unexpected error occurred",
       });
     },
   });
@@ -90,41 +79,63 @@ export default function LoginForm() {
       linkHref="/register"
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid gap-4"
+          aria-label="Login form"
+        >
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="email">Email</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    id="email"
+                    {...field}
                     type="email"
                     placeholder="m@example.com"
-                    required
-                    {...field}
+                    autoComplete="email"
+                    disabled={isPending}
+                    aria-describedby="email-error"
                   />
                 </FormControl>
-                <FormMessage className="text-red-600" />
+                <FormMessage id="email-error" className="text-red-600" />
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="password">Password</FormLabel>
+                <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input id="password" type="password" required {...field} />
+                  <Input
+                    {...field}
+                    type="password"
+                    autoComplete="current-password"
+                    disabled={isPending}
+                    aria-describedby="password-error"
+                  />
                 </FormControl>
-                <FormMessage className="text-red-600" />
+                <FormMessage id="password-error" className="text-red-600" />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Logging in..." : "Login"}
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isPending}
+            aria-live="polite"
+          >
+            {isPending ? (
+              <span className="animate-pulse">Logging in...</span>
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
       </Form>
