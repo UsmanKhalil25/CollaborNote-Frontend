@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
+import { LoadingText } from "@/components/ui/loading-text";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,8 +29,8 @@ const NAV_ITEMS = [
 ];
 
 export default function UserNav() {
-  const navigate = useNavigate();
   const { user, setToken, setUser } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleNavigation = (path: string) => {
@@ -53,7 +53,7 @@ export default function UserNav() {
 
       toast({
         variant: "destructive",
-        title: "Login failed",
+        title: "Logout failed",
         description: responseError?.message || "An unexpected error occurred",
       });
     },
@@ -99,12 +99,12 @@ export default function UserNav() {
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} disabled={isPending}>
-          {isPending ? (
-            <span className="animate-pulse">Logging out...</span>
-          ) : (
-            "Logout"
-          )}
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={handleLogout}
+          disabled={isPending}
+        >
+          {isPending ? <LoadingText text="Logging out..." /> : "Logout"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

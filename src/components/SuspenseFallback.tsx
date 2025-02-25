@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 interface SuspenseFallbackProps {
   children?: React.ReactNode;
@@ -10,7 +10,7 @@ export default function SuspenseFallback({ children }: SuspenseFallbackProps) {
     <Suspense
       fallback={
         <div className="flex items-center justify-center h-screen">
-          <LoadingSpinner />
+          <Spinner />
         </div>
       }
     >

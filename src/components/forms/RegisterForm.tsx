@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
-import { Loader2 } from "lucide-react";
 
 import {
   Form,
@@ -17,9 +16,13 @@ import {
 import { useToast } from "@/hooks/use-toast.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { LoadingText } from "../ui/loading-text";
+
 import AuthCard from "@/components/AuthCard.tsx";
+
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { api } from "@/api";
+
 import { convertCamelCaseToSnakeCase } from "@/lib/utils.ts";
 import { Response, ErrorResponse } from "@/types/api";
 
@@ -180,10 +183,7 @@ export default function RegisterForm() {
             aria-live="polite"
           >
             {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
-              </>
+              <LoadingText text="Creating Account..." />
             ) : (
               "Create Account"
             )}

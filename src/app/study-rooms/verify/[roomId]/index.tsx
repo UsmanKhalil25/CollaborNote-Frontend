@@ -7,6 +7,8 @@ import { ENDPOINTS } from "@/config/api-config";
 import { convertSnakeCaseToCamelCase } from "@/lib/utils";
 import { AuthContext } from "@/auth/auth-context.ts";
 
+import { Response } from "@/types/api";
+
 export default function StudyRoomVerifyPage() {
   const navigate = useNavigate();
   const { roomId } = useParams();

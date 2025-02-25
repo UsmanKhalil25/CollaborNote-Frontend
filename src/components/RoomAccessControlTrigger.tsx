@@ -5,11 +5,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 import InviteAndShareCard from "@/components/InviteAndShareCard";
 
 import { ParticipantOut } from "@/types/participant";
-import { Button } from "./ui/button";
 
 interface RoomAccessControlTriggerProps {
   roomId: string;

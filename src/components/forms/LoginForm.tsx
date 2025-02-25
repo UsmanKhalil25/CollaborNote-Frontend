@@ -13,13 +13,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-import { useToast } from "@/hooks/use-toast.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { LoadingText } from "@/components/ui/loading-text";
+
 import AuthCard from "@/components/AuthCard.tsx";
+
+import { useToast } from "@/hooks/use-toast.ts";
+import { useAuth } from "@/hooks/use-auth";
+
 import { ENDPOINTS } from "@/config/api-config.ts";
 import { api } from "@/api";
-import { useAuth } from "@/hooks/use-auth";
 import { Response, ErrorResponse } from "@/types/api";
 
 const loginSchema = z.object({
@@ -132,11 +136,7 @@ export default function LoginForm() {
             disabled={isPending}
             aria-live="polite"
           >
-            {isPending ? (
-              <span className="animate-pulse">Logging in...</span>
-            ) : (
-              "Login"
-            )}
+            {isPending ? <LoadingText text="Logging in..." /> : "Login"}
           </Button>
         </form>
       </Form>
