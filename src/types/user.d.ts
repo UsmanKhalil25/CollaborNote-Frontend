@@ -1,10 +1,10 @@
 export interface User {
   email: string;
-  first_name: string;
-  friend_requests_received: string[];
-  friend_requests_sent: string[];
+  firstName: string;
+  lastName: string;
+  friendRequestReceived: string[];
+  friendRequestsSent: string[];
   friends: string[];
-  last_name: string;
   avatar?: string;
   isOnline: boolean;
   _id: string;

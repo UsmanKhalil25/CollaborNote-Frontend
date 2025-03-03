@@ -33,7 +33,7 @@ interface UserData {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      return sessionStorage.getItem("auth_token");
+      return sessionStorage.getItem("authToken");
     }
     return null;
   });
@@ -110,9 +110,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (typeof window === "undefined") return;
 
     if (token) {
-      sessionStorage.setItem("auth_token", token);
+      sessionStorage.setItem("authToken", token);
     } else {
-      sessionStorage.removeItem("auth_token");
+      sessionStorage.removeItem("authToken");
     }
   }, [token]);
 

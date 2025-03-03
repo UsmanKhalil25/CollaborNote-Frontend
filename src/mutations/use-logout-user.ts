@@ -4,24 +4,17 @@ import { useMutation } from "@tanstack/react-query";
 import { ENDPOINTS } from "@/config/api-config";
 import { api } from "@/api";
 import { Response, ErrorResponse } from "@/types/api";
-import { LoginFormValues } from "@/types/auth";
 
-export function useLoginUser({
+export function useLogoutUser({
   onSuccess,
   onError,
 }: {
-  onSuccess: (response: Response<{ accessToken: string }>) => void;
+  onSuccess: (response: Response<null>) => void;
   onError: (error: ErrorResponse) => void;
 }) {
-  return useMutation<
-    Response<{ accessToken: string }>,
-    AxiosError<ErrorResponse>,
-    LoginFormValues
-  >({
-    mutationFn: (data: LoginFormValues) =>
-      api
-        .post<Response<{ accessToken: string }>>(ENDPOINTS.auth.login, data)
-        .then((res) => res.data),
+  return useMutation<Response<null>, AxiosError<ErrorResponse>>({
+    mutationFn: () =>
+      api.post<Response<null>>(ENDPOINTS.auth.logout).then((res) => res.data),
     onSuccess,
     onError: (error) => {
       onError(

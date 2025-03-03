@@ -17,12 +17,15 @@ import { LoadingText } from "@/components/ui/loading-text";
 import AuthCard from "@/components/AuthCard.tsx";
 
 import { useToast } from "@/hooks/use-toast.ts";
+import { useAuth } from "@/hooks/use-auth";
 import { useLoginUser } from "@/mutations/use-login-user";
+
 import { loginSchema, LoginFormValues } from "@/types/auth";
 
 export default function LoginForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { setToken } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -34,6 +37,7 @@ export default function LoginForm() {
 
   const { mutate: loginUser, isPending } = useLoginUser({
     onSuccess: (response) => {
+      setToken(response.data.accessToken);
       toast({ title: response.message, description: "Welcome back!" });
       navigate("/", { replace: true });
     },

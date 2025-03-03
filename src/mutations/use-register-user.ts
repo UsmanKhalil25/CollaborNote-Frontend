@@ -18,7 +18,7 @@ export function useRegisterUser({
     AxiosError<ErrorResponse>,
     RegisterFormValues
   >({
-    mutationFn: (data) =>
+    mutationFn: (data: RegisterFormValues) =>
       api
         .post<Response<null>>(ENDPOINTS.auth.register, data)
         .then((res) => res.data),

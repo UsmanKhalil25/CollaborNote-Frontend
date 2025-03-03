@@ -1,6 +1,4 @@
-import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,10 +16,9 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
-import { getUserInitials } from "@/lib/utils.ts";
-import { ENDPOINTS } from "@/config/api-config";
-import { Response, ErrorResponse } from "@/types/api";
-import { api } from "@/api";
+import { getUserInitials } from "@/utils";
+import { useLogoutUser } from "@/mutations";
+import { Response } from "@/types/api";
 
 const NAV_ITEMS = [
   { label: "Profile", path: "/profile" },
@@ -37,24 +34,18 @@ export default function UserNav() {
     navigate(path);
   };
 
-  const { mutate: blacklistToken, isPending } = useMutation({
-    mutationFn: async () => {
-      const response = await api.post<Response<null>>(ENDPOINTS.auth.logout);
-      return response.data;
-    },
+  const { mutate: blacklistToken, isPending } = useLogoutUser({
     onSuccess: (response: Response<null>) => {
       setUser(null);
       setToken(null);
       toast({ title: response.message, description: "Come back soon" });
       navigate("/", { replace: true });
     },
-    onError: (error: AxiosError<ErrorResponse>) => {
-      const responseError = error.response?.data;
-
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Logout failed",
-        description: responseError?.message || "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred",
       });
     },
   });
@@ -71,7 +62,7 @@ export default function UserNav() {
           <Avatar>
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>
-              {getUserInitials(user?.first_name, user?.last_name)}
+              {getUserInitials(user?.firstName, user?.lastName)}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -80,7 +71,7 @@ export default function UserNav() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {user?.first_name}
+              {user?.firstName}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
               {user?.email}
