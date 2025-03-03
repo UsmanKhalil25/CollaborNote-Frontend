@@ -1,9 +1,6 @@
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
 
 import {
   Form,
@@ -13,27 +10,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form.tsx";
-import { useToast } from "@/hooks/use-toast.ts";
+
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { LoadingText } from "../ui/loading-text";
+import { LoadingText } from "@/components/ui/loading-text";
 
 import AuthCard from "@/components/AuthCard.tsx";
 
-import { ENDPOINTS } from "@/config/api-config.ts";
-import { api } from "@/api";
-
-import { convertCamelCaseToSnakeCase } from "@/lib/utils.ts";
-import { Response, ErrorResponse } from "@/types/api";
-
-const registerSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { useRegisterUser } from "@/mutations";
+import { useToast } from "@/hooks/use-toast.ts";
+import { RegisterFormValues, registerSchema } from "@/types/auth";
 
 export default function RegisterForm() {
   const { toast } = useToast();
@@ -49,26 +35,20 @@ export default function RegisterForm() {
     },
   });
 
-  const { mutate: registerUser, isPending } = useMutation({
-    mutationFn: async (data: RegisterFormValues) => {
-      const transformedData = convertCamelCaseToSnakeCase(data);
-      const response = await api.post<Response<null>>(
-        ENDPOINTS.auth.register,
-        transformedData
-      );
-      return response.data.message;
+  const { mutate: registerUser, isPending } = useRegisterUser({
+    onSuccess: (response) => {
+      toast({
+        title: response.message,
+        description:
+          "You have registered successfully. Please log in to continue.",
+      });
+      navigate("/login");
     },
-    onSuccess: (message) => {
-      toast({ description: message });
-      navigate("/login", { replace: true });
-    },
-    onError: (error: AxiosError<ErrorResponse>) => {
-      const responseError = error.response?.data;
-
+    onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Registration failed",
-        description: responseError?.message || "An unexpected error occurred",
+        title: "Registeration failed",
+        description: error.message || "An unexpected error occurred",
       });
     },
   });

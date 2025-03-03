@@ -1,9 +1,6 @@
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 
 import {
   Form,
@@ -20,22 +17,11 @@ import { LoadingText } from "@/components/ui/loading-text";
 import AuthCard from "@/components/AuthCard.tsx";
 
 import { useToast } from "@/hooks/use-toast.ts";
-import { useAuth } from "@/hooks/use-auth";
-
-import { ENDPOINTS } from "@/config/api-config.ts";
-import { api } from "@/api";
-import { Response, ErrorResponse } from "@/types/api";
-
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { useLoginUser } from "@/mutations/use-login-user";
+import { loginSchema, LoginFormValues } from "@/types/auth";
 
 export default function LoginForm() {
   const { toast } = useToast();
-  const { setToken } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
@@ -46,27 +32,16 @@ export default function LoginForm() {
     },
   });
 
-  const { mutate: loginUser, isPending } = useMutation({
-    mutationFn: async (data: LoginFormValues) => {
-      const response = await api.post<Response<{ access_token: string }>>(
-        ENDPOINTS.auth.login,
-        data
-      );
-      return response.data;
-    },
-    onSuccess: (response: Response<{ access_token: string }>) => {
-      const token = response.data.access_token;
-      setToken(token);
+  const { mutate: loginUser, isPending } = useLoginUser({
+    onSuccess: (response) => {
       toast({ title: response.message, description: "Welcome back!" });
       navigate("/", { replace: true });
     },
-    onError: (error: AxiosError<ErrorResponse>) => {
-      const responseError = error.response?.data;
-
+    onError: (error) => {
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: responseError?.message || "An unexpected error occurred",
+        description: error.message || "An unexpected error occurred",
       });
     },
   });
